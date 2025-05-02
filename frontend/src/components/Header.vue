@@ -1,7 +1,7 @@
 <template>
   <header>
-    <img src="https://s.yimg.com/rz/p/yahoo_finance_en-US_s_f_p_bestfit_finance.png" alt="Yahoo Finance" />
-    <h1>Yahoo AI Stock Predictor</h1>
+    <!-- <img src="https://s.yimg.com/rz/p/yahoo_finance_en-US_s_f_p_bestfit_finance.png" alt="Yahoo Finance" /> -->
+    <h1>AI Stock Predictor - AAPL</h1>
   </header>
 </template>
 

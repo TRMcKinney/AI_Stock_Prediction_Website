@@ -1,7 +1,8 @@
 <template>
   <div>
-    <h2>Yahoo Stock Price History</h2>
-    <LineChart :chart-data="chartData" :chart-options="chartOptions" />
+    <h2>Apple Stock Price History</h2>
+    <Line :data="chartData" :options="chartOptions" v-if="chartData" />
+    <p v-else>Loading...</p>
   </div>
 </template>
 
@@ -22,37 +23,47 @@ import {
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement)
 
-const LineChart = Line
-const chartData = ref({
-  labels: [],
-  datasets: [
-    {
-      label: 'Close Price ($)',
-      data: [],
-      fill: false,
-      borderColor: '#410093',
-      tension: 0.1
-    }
-  ]
-})
+const chartData = ref(null)
 
 const chartOptions = {
   responsive: true,
   plugins: {
-    legend: {
-      position: 'top'
-    },
+    legend: { position: 'top' },
     title: {
-      display: false
+      display: true,
+      text: 'AAPL Stock Closing Price',
     }
   }
 }
 
 onMounted(async () => {
-  const res = await axios.get('http://localhost:8000/stock-history')  // your FastAPI endpoint
-  const prices = res.data
+  try {
+    const res = await axios.get('http://localhost:8000/stock-history')
+    const data = res.data
+    console.log('📈 API response:', data)
 
-  chartData.value.labels = prices.map(d => d.Date)
-  chartData.value.datasets[0].data = prices.map(d => d.Close)
+    chartData.value = {
+      labels: data.map(d => d.date),
+      datasets: [
+        {
+          label: 'Close ($)',
+          data: data.map(d => d.close),
+          borderColor: '#410093',
+          fill: false,
+          tension: 0.2
+        }
+      ]
+    }
+  } catch (err) {
+    console.error('❌ Error loading chart data:', err)
+  }
 })
 </script>
+
+<style scoped>
+canvas {
+  width: 100% !important;
+  max-width: 800px;
+  height: 400px !important;
+}
+</style>
