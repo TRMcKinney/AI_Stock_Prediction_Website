@@ -8,7 +8,10 @@ app = FastAPI()
 # Allow requests from your Vue frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",  # for local dev
+        "https://ai-stock-predictorr.netlify.app"  # your Netlify site
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
