@@ -38,7 +38,7 @@ const chartOptions = {
 
 onMounted(async () => {
   try {
-    const res = await axios.get('http://localhost:8000/stock-history')
+    const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/stock-history`)
     const data = res.data
     console.log('📈 API response:', data)
 
