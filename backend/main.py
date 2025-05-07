@@ -46,7 +46,7 @@ def stock_history():
 
     url = "https://finnhub.io/api/v1/stock/candle"
     params = {
-        "symbol": "AAPL",
+        "symbol": "MSFT",
         "resolution": "D",
         "from": start,
         "to": end,
