@@ -26,9 +26,12 @@ def stock_history():
     import yfinance as yf
     import pandas as pd
 
+    print(" Fetching AAPL stock data...")
     df = yf.download("AAPL", period="1mo", interval="1d", group_by="ticker")
+    print("Data fetched.", len(df), "rows.")
 
     if df.empty:
+        print("❌ No data found for AAPL.")
         return []
 
     df.reset_index(inplace=True)
