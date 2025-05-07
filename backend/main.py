@@ -6,20 +6,20 @@ import requests
 import os
 import time
 
-# Load .env (for local development)
+# Load local .env
 load_dotenv()
 
-# Get API key (works both locally and on Render)
+# Config
 FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
+STOCK_SYMBOL = "AAPL"  # ✅ Set your symbol here once
 
 app = FastAPI()
 
-# CORS settings: allow local + deployed frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",  # Vue dev server
-        "https://ai-stock-predictorr.netlify.app",  # Your Netlify site
+        "http://localhost:5173",
+        "https://ai-stock-predictorr.netlify.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -29,12 +29,12 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message": "Hello from FastAPI + Finnhub 👋"}
+    return {"message": f"FastAPI + Finnhub backend for {STOCK_SYMBOL}"}
 
 
 @app.get("/stock-history")
 def stock_history():
-    print("📡 Fetching AAPL stock data from Finnhub...")
+    print(f"📡 Fetching {STOCK_SYMBOL} stock data from Finnhub...")
 
     if not FINNHUB_API_KEY:
         print("❌ Missing API key")
@@ -46,7 +46,7 @@ def stock_history():
 
     url = "https://finnhub.io/api/v1/stock/candle"
     params = {
-        "symbol": "MSFT",
+        "symbol": STOCK_SYMBOL,
         "resolution": "D",
         "from": start,
         "to": end,
@@ -56,8 +56,10 @@ def stock_history():
     response = requests.get(url, params=params)
     data = response.json()
 
+    print(f"🧾 Raw response for {STOCK_SYMBOL}:", data)
+
     if data.get("s") != "ok":
-        print("❌ Failed to fetch data:", data)
+        print(f"❌ Finnhub error for {STOCK_SYMBOL}:", data)
         return []
 
     history = []
@@ -65,5 +67,5 @@ def stock_history():
         date_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
         history.append({"date": date_str, "close": round(close, 2)})
 
-    print(f"✅ Fetched {len(history)} rows")
+    print(f"✅ Fetched {len(history)} rows for {STOCK_SYMBOL}")
     return history
