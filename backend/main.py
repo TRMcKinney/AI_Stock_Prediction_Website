@@ -1,59 +1,69 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import yfinance as yf
-import pandas as pd
+from datetime import datetime
+from dotenv import load_dotenv
+import requests
+import os
+import time
+
+# Load .env (for local development)
+load_dotenv()
+
+# Get API key (works both locally and on Render)
+FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 
 app = FastAPI()
 
-# Allow requests from your Vue frontend
+# CORS settings: allow local + deployed frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",  # for local dev
-        "https://ai-stock-predictorr.netlify.app"  # your Netlify site
+        "http://localhost:5173",  # Vue dev server
+        "https://ai-stock-predictorr.netlify.app",  # Your Netlify site
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def root():
-    return {"message": "FastAPI backend is running"}
+    return {"message": "Hello from FastAPI + Finnhub 👋"}
+
 
 @app.get("/stock-history")
 def stock_history():
-    import yfinance as yf
-    import pandas as pd
+    print("📡 Fetching AAPL stock data from Finnhub...")
 
-    print(" Fetching AAPL stock data...")
-    df = yf.download("AAPL", period="1mo", interval="1d", group_by="ticker")
-    print("Data fetched.", len(df), "rows.")
+    if not FINNHUB_API_KEY:
+        print("❌ Missing API key")
+        return {"error": "Missing API key"}
 
-    if df.empty:
-        print("❌ No data found for AAPL.")
+    # Get timestamps for the past 30 days
+    end = int(time.time())
+    start = end - 60 * 60 * 24 * 30
+
+    url = "https://finnhub.io/api/v1/stock/candle"
+    params = {
+        "symbol": "AAPL",
+        "resolution": "D",
+        "from": start,
+        "to": end,
+        "token": FINNHUB_API_KEY,
+    }
+
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    if data.get("s") != "ok":
+        print("❌ Failed to fetch data:", data)
         return []
 
-    df.reset_index(inplace=True)
+    history = []
+    for ts, close in zip(data["t"], data["c"]):
+        date_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+        history.append({"date": date_str, "close": round(close, 2)})
 
-    # Flatten multi-index columns
-    df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
-    # Print flattened column names
-    print("📊 Flattened columns:", df.columns)
-
-    # Check what the 'date' column is actually called
-    date_col = [col for col in df.columns if col.lower().startswith("date")][0]
-    close_col = [col for col in df.columns if "close" in col.lower() and "aapl" in col.lower()][0]
-
-    print("📆 Date column:", date_col)
-    print("💰 Close column:", close_col)
-
-    history = [
-        {
-            "date": row[date_col].strftime("%Y-%m-%d"),
-            "close": round(row[close_col], 2)
-        }
-        for _, row in df.iterrows()
-    ]
-
+    print(f"✅ Fetched {len(history)} rows")
     return history
