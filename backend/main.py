@@ -1,25 +1,26 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
 from dotenv import load_dotenv
-import requests
+from datetime import datetime
 import os
+import requests
 import time
 
-# Load local .env
+# Load environment variables from .env
 load_dotenv()
 
-# Config
-FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
-STOCK_SYMBOL = "AAPL"  # ✅ Set your symbol here once
+# Constants
+ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
+STOCK_SYMBOL = "AAPL"
 
 app = FastAPI()
 
+# CORS setup
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "https://ai-stock-predictorr.netlify.app",
+        "http://localhost:5173",  # Local Vue dev server
+        "https://ai-stock-predictorr.netlify.app"  # Deployed frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -29,42 +30,42 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message": f"FastAPI + Finnhub backend for {STOCK_SYMBOL}"}
+    return {"message": f"FastAPI + Alpha Vantage backend for {STOCK_SYMBOL}"}
 
 
 @app.get("/stock-history")
 def stock_history():
-    print(f"📡 Fetching {STOCK_SYMBOL} stock data from Finnhub...")
+    print(f"📡 Fetching {STOCK_SYMBOL} stock data from Alpha Vantage...")
 
-    if not FINNHUB_API_KEY:
-        print("❌ Missing API key")
+    if not ALPHA_VANTAGE_API_KEY:
+        print("❌ API key missing")
         return {"error": "Missing API key"}
 
-    # Get timestamps for the past 30 days
-    end = int(time.time())
-    start = end - 60 * 60 * 24 * 30
-
-    url = "https://finnhub.io/api/v1/stock/candle"
+    url = "https://www.alphavantage.co/query"
     params = {
+        "function": "TIME_SERIES_DAILY",  # FREE endpoint
         "symbol": STOCK_SYMBOL,
-        "resolution": "D",
-        "from": start,
-        "to": end,
-        "token": FINNHUB_API_KEY,
+        "outputsize": "compact",  # ~last 100 days
+        "apikey": ALPHA_VANTAGE_API_KEY,
     }
+
+    # Optional: be kind to their rate limit
+    time.sleep(1)
 
     response = requests.get(url, params=params)
     data = response.json()
 
-    print(f"🧾 Raw response for {STOCK_SYMBOL}:", data)
-
-    if data.get("s") != "ok":
-        print(f"❌ Finnhub error for {STOCK_SYMBOL}:", data)
+    # Handle errors and rate limit messages
+    if "Time Series (Daily)" not in data:
+        print("❌ Error:", data.get("Note") or data.get("Error Message") or data)
         return []
 
+    series = data["Time Series (Daily)"]
+
+    # Format for chart (date ascending)
     history = []
-    for ts, close in zip(data["t"], data["c"]):
-        date_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+    for date_str, values in sorted(series.items()):
+        close = float(values["4. close"])
         history.append({"date": date_str, "close": round(close, 2)})
 
     print(f"✅ Fetched {len(history)} rows for {STOCK_SYMBOL}")
