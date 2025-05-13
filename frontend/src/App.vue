@@ -2,6 +2,10 @@
   <div id="app">
     <Header />
 
+    <div class="page-intro">
+      <PageIntro />
+    </div>
+
     <main>
       <div class="content-row">
         <div class="left-column">
@@ -28,6 +32,7 @@ import Header from './components/Header.vue'
 import PredictButton from './components/PredictButton.vue'
 import PredictionTable from './components/PredictionTable.vue'
 import StockChart from './components/StockChart.vue'
+import PageIntro from './components/PageIntro.vue'
 </script>
 
 <style scoped>
@@ -60,6 +65,10 @@ main {
 /* Right: chart */
 .right-column {
   flex: 1;
+}
+
+.page-intro {
+  padding: 1rem;
 }
 
 .card {
