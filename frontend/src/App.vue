@@ -8,6 +8,7 @@
 
     <main>
       <div class="content-row">
+        
         <div class="left-column">
           <div class="card">
             <PredictButton />
@@ -21,7 +22,11 @@
           <div class="card">
             <StockChart />
           </div>
+          <div class="card">
+            <FetchButton />
+          </div>
         </div>
+      
       </div>
     </main>
   </div>
@@ -33,6 +38,7 @@ import PredictButton from './components/PredictButton.vue'
 import PredictionTable from './components/PredictionTable.vue'
 import StockChart from './components/StockChart.vue'
 import PageIntro from './components/PageIntro.vue'
+import FetchButton from './components/FetchButton.vue'
 </script>
 
 <style scoped>

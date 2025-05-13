@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 import requests
 import time
+import subprocess
 
 # Load environment variables from .env
 load_dotenv()
@@ -70,3 +71,17 @@ def stock_history():
 
     print(f"✅ Fetched {len(history)} rows for {STOCK_SYMBOL}")
     return history
+
+@app.post("/fetch-latest")
+def fetch_latest():
+    try:
+        print("🚀 Triggering data fetch...")
+        result = subprocess.run(["python", "fetch_and_upload.py"], capture_output=True, text=True)
+
+        if result.returncode == 0:
+            return {"status": "success", "output": result.stdout}
+        else:
+            return {"status": "error", "output": result.stderr}
+
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
