@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from supabase import create_client, Client
 from dotenv import load_dotenv
 from datetime import datetime
 import os
@@ -12,6 +13,18 @@ load_dotenv()
 
 # Constants
 ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+# 🛑 Fail early if any critical variable is missing
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise RuntimeError("❌ Supabase credentials are missing from environment variables.")
+
+if not ALPHA_VANTAGE_API_KEY:
+    raise RuntimeError("❌ Alpha Vantage API key is missing from environment variables.")
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 STOCK_SYMBOL = "AAPL"
 
 app = FastAPI()
@@ -36,41 +49,29 @@ def root():
 
 @app.get("/stock-history")
 def stock_history():
-    print(f"📡 Fetching {STOCK_SYMBOL} stock data from Alpha Vantage...")
+    print("📡 Fetching latest 100 stock rows from Supabase...")
 
-    if not ALPHA_VANTAGE_API_KEY:
-        print("❌ API key missing")
-        return {"error": "Missing API key"}
+    response = supabase.table("stock_prices") \
+        .select("*") \
+        .order("timestamp", desc=True) \
+        .limit(100) \
+        .execute()
 
-    url = "https://www.alphavantage.co/query"
-    params = {
-        "function": "TIME_SERIES_DAILY",  # FREE endpoint
-        "symbol": STOCK_SYMBOL,
-        "outputsize": "compact",  # ~last 100 days
-        "apikey": ALPHA_VANTAGE_API_KEY,
-    }
-
-    # Optional: be kind to their rate limit
-    time.sleep(1)
-
-    response = requests.get(url, params=params)
-    data = response.json()
-
-    # Handle errors and rate limit messages
-    if "Time Series (Daily)" not in data:
-        print("❌ Error:", data.get("Note") or data.get("Error Message") or data)
+    data = response.data or []
+    if not data:
         return []
 
-    series = data["Time Series (Daily)"]
+    # sort by timestamp ascending (oldest to newest)
+    sorted_data = sorted(data, key=lambda x: x["timestamp"])
 
-    # Format for chart (date ascending)
-    history = []
-    for date_str, values in sorted(series.items()):
-        close = float(values["4. close"])
-        history.append({"date": date_str, "close": round(close, 2)})
-
-    print(f"✅ Fetched {len(history)} rows for {STOCK_SYMBOL}")
-    return history
+    result = [
+        {
+            "date": row["timestamp"],
+            "close": round(row["close"], 2)
+        }
+        for row in sorted_data
+    ]
+    return result
 
 @app.post("/fetch-latest")
 def fetch_latest():
