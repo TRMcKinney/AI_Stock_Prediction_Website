@@ -1,6 +1,7 @@
 <template>
   <div style="margin: 1rem 0;">
     <button @click="predict">Predict</button>
+    <span style="margin-left: 0.5rem; font-size: 0.9rem; color: #b35b00;">Work In Progress</span>
   </div>
 </template>
 

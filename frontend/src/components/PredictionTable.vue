@@ -1,6 +1,9 @@
 <template>
   <div>
-    <h2>Prediction History</h2>
+    <h2>
+      Prediction History
+      <span style="margin-left: 0.5rem; font-size: 0.9rem; color: #b35b00;">Work In Progress</span>
+    </h2>
     <table>
       <thead>
         <tr>

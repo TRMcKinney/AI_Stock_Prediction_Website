@@ -58,6 +58,8 @@ main {
 .content-row {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
 }
 
 /* Left: button + table */
@@ -68,9 +70,12 @@ main {
   gap: 1rem;
 }
 
-/* Right: chart */
+/* Right: chart + fetch button */
 .right-column {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .page-intro {
