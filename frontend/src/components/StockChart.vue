@@ -1,6 +1,9 @@
 <template>
   <div>
-    <h2>Apple Stock Price History</h2>
+    <h2>
+      Apple Stock Price History
+      <span style="margin-left: 0.5rem; font-size: 0.9rem; color: #b35b00;">Last 100 days</span>
+    </h2>
     <Line :data="chartData" :options="chartOptions" v-if="chartData" />
     <p v-else>Loading...</p>
   </div>
@@ -33,6 +36,20 @@ const chartOptions = {
       display: true,
       text: 'AAPL Stock Closing Price',
     }
+  },
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: 'Date',
+      }
+    },
+    y: {
+      title: {
+        display: true,
+        text: 'Close Price ($)',
+      }
+    }
   }
 }
 
@@ -43,7 +60,12 @@ onMounted(async () => {
     console.log('📈 API response:', data)
 
     chartData.value = {
-      labels: data.map(d => d.date),
+      labels: data.map(d => {
+        const date = new Date(d.date)
+        return `${date.getDate().toString().padStart(2, '0')}/${
+          (date.getMonth() + 1).toString().padStart(2, '0')
+        }/${date.getFullYear()}`
+      }),
       datasets: [
         {
           label: 'Close ($)',
@@ -59,6 +81,7 @@ onMounted(async () => {
   }
 })
 </script>
+
 
 <style scoped>
 canvas {
