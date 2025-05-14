@@ -7,6 +7,7 @@ import os
 import requests
 import time
 import subprocess
+from model import train_and_predict
 
 # Load environment variables from .env
 load_dotenv()
@@ -41,6 +42,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/predict")
+def predict():
+    response = supabase.table("stock_prices").select("*").order("date").execute()
+    df = pd.DataFrame(response.data)
+    if df.empty:
+        return {"error": "No data available"}
+    
+    result = train_and_predict(df)
+    return result
 
 @app.get("/row-count")
 def row_count():

@@ -1,14 +1,17 @@
 <template>
   <div style="margin: 1rem 0;">
     <button @click="predict">Predict</button>
-    <span style="margin-left: 0.5rem; font-size: 0.9rem; color: #b35b00;">Work In Progress</span>
+    <span style="margin-left: 0.5rem; font-size: 0.9rem; color: #b35b00;">Neural Network Model</span>
   </div>
 </template>
 
 <script setup>
+import { inject } from 'vue'
+const triggerPrediction = inject('triggerPrediction')
+
 function predict() {
-  alert('Prediction button clicked!')
-  // Later: use axios to call FastAPI
+  alert('Running prediction...')
+  triggerPrediction()
 }
 </script>
 

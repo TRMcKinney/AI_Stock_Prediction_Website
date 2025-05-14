@@ -14,6 +14,9 @@
             <PredictButton />
           </div>
           <div class="card">
+            <PredictionDetails ref="predictionDetailsRef" />
+          </div>
+          <div class="card">
             <PredictionTable />
           </div>
         </div>
@@ -36,13 +39,21 @@
 </template>
 
 <script setup>
-import Header from './components/Header.vue'
+import { ref, provide } from 'vue'
 import PredictButton from './components/PredictButton.vue'
 import PredictionTable from './components/PredictionTable.vue'
 import StockChart from './components/StockChart.vue'
 import PageIntro from './components/PageIntro.vue'
+import Header from './components/Header.vue'
 import FetchButton from './components/FetchButton.vue'
 import DataChecker from './components/DataChecker.vue'
+import PredictionDetails from './components/PredictionDetails.vue'
+
+const predictionDetailsRef = ref(null)
+const triggerPrediction = () => {
+  predictionDetailsRef.value?.updatePrediction()
+}
+provide('triggerPrediction', triggerPrediction)
 </script>
 
 <style scoped>
