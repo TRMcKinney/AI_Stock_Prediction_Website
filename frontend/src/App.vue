@@ -25,6 +25,9 @@
           <div class="card">
             <FetchButton />
           </div>
+          <div class="card">
+            <DataChecker />
+          </div>
         </div>
       
       </div>
@@ -39,6 +42,7 @@ import PredictionTable from './components/PredictionTable.vue'
 import StockChart from './components/StockChart.vue'
 import PageIntro from './components/PageIntro.vue'
 import FetchButton from './components/FetchButton.vue'
+import DataChecker from './components/DataChecker.vue'
 </script>
 
 <style scoped>

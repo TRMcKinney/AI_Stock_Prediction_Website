@@ -42,6 +42,12 @@ app.add_middleware(
 )
 
 
+@app.get("/row-count")
+def row_count():
+    print("📊 Counting rows in Supabase...")
+    response = supabase.table("stock_prices").select("id", count="exact").execute()
+    return {"count": response.count or 0}
+
 @app.get("/")
 def root():
     return {"message": f"FastAPI + Alpha Vantage backend for {STOCK_SYMBOL}"}
