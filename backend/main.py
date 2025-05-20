@@ -10,6 +10,7 @@ from datetime import datetime
 import requests
 import time
 import subprocess
+import pandas as pd
 from model import train_and_predict
 
 # Load environment variables from .env
@@ -47,19 +48,22 @@ app.add_middleware(
 
 @app.get("/predict")
 def predict():
-    response = supabase.table("stock_prices").select("*").order("date").execute()
+    response = supabase.table("stock_prices").select("*").order("timestamp").execute()
     df = pd.DataFrame(response.data)
     if df.empty:
         return {"error": "No data available"}
     
-    result = train_and_predict(df)
-    return result
+    try:
+        result = train_and_predict(df)
+        return result
+    except ValueError as e:
+        return {"error": str(e)}
 
-@app.get("/row-count")
-def row_count():
-    print("Counting rows in Supabase...")
-    response = supabase.table("stock_prices").select("id", count="exact").execute()
-    return {"count": response.count or 0}
+#@app.get("/row-count")
+#def row_count():
+#    print("Counting rows in Supabase...")
+#    response = supabase.table("stock_prices").select("id", count="exact").execute()
+#    return {"count": response.count or 0}
 
 @app.get("/")
 def root():

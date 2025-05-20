@@ -35,6 +35,14 @@
       
       </div>
     </main>
+
+    <Modal v-if="showModal">
+      <div>
+        <p>{{ modalMessage }}</p>
+        <div class="loader"></div>
+      </div>
+    </Modal>
+
   </div>
 </template>
 
@@ -42,6 +50,7 @@
 
 <script setup>
 
+import { watch } from 'vue'
 import { ref, provide } from 'vue'
 import PredictButton from './components/PredictButton.vue'
 import PredictionTable from './components/PredictionTable.vue'
@@ -51,17 +60,30 @@ import Header from './components/Header.vue'
 import FetchButton from './components/FetchButton.vue'
 import DataChecker from './components/DataChecker.vue'
 import PredictionDetails from './components/PredictionDetails.vue'
+import Modal from './components/Modal.vue'
 
 const rowCountTrigger = ref(0)
 function handleFetchComplete() {
   rowCountTrigger.value++  // triggers DataChecker to refetch from Supabase
 }
 
+const showModal = ref(false)
+const modalMessage = ref('Running prediction...')
+
 const predictionDetailsRef = ref(null)
-const triggerPrediction = () => {
-  predictionDetailsRef.value?.updatePrediction()
+
+const triggerPrediction = async () => {
+  showModal.value = true
+  modalMessage.value = 'Running prediction...'
+  await predictionDetailsRef.value?.updatePrediction()
+  showModal.value = false
 }
+
 provide('triggerPrediction', triggerPrediction)
+
+watch(showModal, (isOpen) => {
+  document.body.style.overflow = isOpen ? 'hidden' : 'auto'
+})
 
 </script>
 
@@ -114,6 +136,21 @@ main {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
+}
+
+.loader {
+  margin: 1.5rem auto 0;
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #410093;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 </style>

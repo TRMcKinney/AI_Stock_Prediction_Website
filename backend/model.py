@@ -31,6 +31,8 @@ def train_and_predict(df: pd.DataFrame):
                     df['close'].abs().rolling(200).mean()) * 100
 
     df = df.dropna()
+    if df.empty:
+        raise ValueError("Not enough data to compute features — at least 200 rows required.")
 
     features = df[['10d_close_pct', 'ma14', 'rsi14', 'ma30', 'rsi30', 'ma50', 'rsi50', 'ma200', 'rsi200']]
     targets = df['10d_future_close_pct']

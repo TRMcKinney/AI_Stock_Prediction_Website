@@ -15,6 +15,14 @@ const plotUrl = ref('')
 async function updatePrediction() {
   const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/predict`)
   const data = await res.json()
+  
+  if (data.error) {
+    prediction.value = 0
+    plotUrl.value = ''
+    alert(`Prediction failed: ${data.error}`)
+    return
+  }
+    
   prediction.value = data.prediction
   plotUrl.value = `data:image/png;base64,${data.plot_base64}`
 }
