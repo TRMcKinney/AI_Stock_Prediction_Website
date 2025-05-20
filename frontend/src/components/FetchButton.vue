@@ -11,11 +11,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, defineEmits } from 'vue'
 import axios from 'axios'
 
 const loading = ref(false)
 const message = ref('')
+const emit = defineEmits(['fetch-complete'])
 
 const fetchData = async () => {
   loading.value = true
@@ -24,13 +25,14 @@ const fetchData = async () => {
   try {
     const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/fetch-latest`)
     if (res.data.status === "success") {
-      message.value = "✅ Data fetch successful!"
+      message.value = "Data fetch successful!"
+      emit('fetch-complete')  // tell parent component the fetch is done
     } else {
-      message.value = "⚠️ Error: " + (res.data.output || res.data.message)
+      message.value = "Error: " + (res.data.output || res.data.message)
     }
   } catch (err) {
     console.error(err)
-    message.value = "❌ Server error."
+    message.value = "Server error."
   }
 
   loading.value = false

@@ -55,9 +55,9 @@ const chartOptions = {
 
 onMounted(async () => {
   try {
-    const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/stock-history`)
+    const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/stock-100`)
     const data = res.data
-    console.log('📈 API response:', data)
+    console.log('API response:', data)
 
     chartData.value = {
       labels: data.map(d => {
@@ -77,7 +77,7 @@ onMounted(async () => {
       ]
     }
   } catch (err) {
-    console.error('❌ Error loading chart data:', err)
+    console.error('Error loading chart data:', err)
   }
 })
 </script>

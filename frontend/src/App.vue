@@ -38,7 +38,10 @@
   </div>
 </template>
 
+
+
 <script setup>
+
 import { ref, provide } from 'vue'
 import PredictButton from './components/PredictButton.vue'
 import PredictionTable from './components/PredictionTable.vue'
@@ -49,12 +52,21 @@ import FetchButton from './components/FetchButton.vue'
 import DataChecker from './components/DataChecker.vue'
 import PredictionDetails from './components/PredictionDetails.vue'
 
+const rowCountTrigger = ref(0)
+function handleFetchComplete() {
+  rowCountTrigger.value++  // triggers DataChecker to refetch from Supabase
+}
+
 const predictionDetailsRef = ref(null)
 const triggerPrediction = () => {
   predictionDetailsRef.value?.updatePrediction()
 }
 provide('triggerPrediction', triggerPrediction)
+
 </script>
+
+
+
 
 <style scoped>
 #app {
