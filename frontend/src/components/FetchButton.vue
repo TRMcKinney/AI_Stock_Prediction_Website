@@ -25,8 +25,12 @@ const fetchData = async () => {
   try {
     const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/fetch-latest`)
     if (res.data.status === "success") {
-      message.value = "Data fetch successful!"
-      emit('fetch-complete')  // tell parent component the fetch is done
+      const count = res.data.uploaded ?? 0
+      message.value =
+        count > 0
+          ? `Data fetch successful! ${count} records uploaded.`
+          : `No new records — data is already up to date.`
+      emit('fetch-complete')
     } else {
       message.value = "Error: " + (res.data.output || res.data.message)
     }

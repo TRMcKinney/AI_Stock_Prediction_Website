@@ -56,20 +56,31 @@ def get_daily_stock_data(symbol: str):
 # === UPSERT TO SUPABASE ===
 def upload_to_supabase(records):
     print("Uploading to Supabase...")
+    inserted_count = 0
     for row in records:
-        # Check if row already exists
         existing = supabase.table(TABLE_NAME).select("id").eq("timestamp", row["timestamp"]).execute()
 
         if len(existing.data) == 0:
             supabase.table(TABLE_NAME).insert(row).execute()
+            inserted_count += 1
             print(f"   Inserted: {row['timestamp']}")
         else:
             print(f"   Skipped duplicate: {row['timestamp']}")
 
     print("Upload complete.")
+    return inserted_count
 
-# === MAIN WORKFLOW ===
-if __name__ == "__main__":
+
+def fetch_and_upload():
     data = get_daily_stock_data(SYMBOL)
+    print(f"Fetched {len(data)} records from Alpha Vantage.")
     if data:
-        upload_to_supabase(data)
+        inserted_count = upload_to_supabase(data)
+        print(f"Success: Uploaded {inserted_count} new records to Supabase.")
+        return inserted_count
+    else:
+        print("No data fetched from Alpha Vantage.")
+        return 0
+
+if __name__ == "__main__":
+    fetch_and_upload()

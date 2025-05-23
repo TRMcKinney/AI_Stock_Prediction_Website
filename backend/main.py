@@ -12,6 +12,7 @@ import time
 import subprocess
 import pandas as pd
 from model import train_and_predict
+from fetch_and_upload import fetch_and_upload
 
 # Load environment variables from .env
 load_dotenv()
@@ -118,22 +119,12 @@ def stock_stats():
     }
 
 
-
 @app.post("/fetch-latest")
 def fetch_latest():
     try:
-        print("Triggering data fetch...")
-        python_executable = sys.executable  # path to current Python (inside venv)
-        result = subprocess.run(
-            [python_executable, "fetch_and_upload.py"],
-            capture_output=True,
-            text=True,
-            cwd=os.path.dirname(__file__)  # ensure working dir is backend/
-        )
-        if result.returncode == 0:
-            return {"status": "success", "output": result.stdout}
-        else:
-            return {"status": "error", "output": result.stderr}
-
+        print("Triggering direct fetch_and_upload call...")
+        uploaded = fetch_and_upload()  # now runs in-process
+        print(f"Returning uploaded count: {uploaded}")
+        return {"status": "success", "uploaded": uploaded}
     except Exception as e:
         return {"status": "error", "message": str(e)}
