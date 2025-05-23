@@ -73,6 +73,6 @@ def train_and_predict(df: pd.DataFrame):
     plt.close()
 
     return {
-        "prediction": latest_prediction,
+        "prediction": float(latest_prediction),
         "plot_base64": img_base64
     }
