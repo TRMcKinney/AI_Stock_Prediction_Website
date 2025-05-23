@@ -10,7 +10,7 @@ import { inject } from 'vue'
 const triggerPrediction = inject('triggerPrediction')
 
 function predict() {
-  alert('Running prediction...')
+  // alert('Running prediction...')
   triggerPrediction()
 }
 </script>
