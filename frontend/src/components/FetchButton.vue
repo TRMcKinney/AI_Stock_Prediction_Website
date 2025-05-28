@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { ref, defineEmits } from 'vue'
+import { ref, onMounted, defineEmits } from 'vue'
 import axios from 'axios'
 
 const loading = ref(false)
@@ -43,7 +43,8 @@ const fetchData = async () => {
         count > 0
           ? `Data fetch successful! ${count} records uploaded.`
           : `No new records — data is already up to date.`
-      emit('fetch-complete')
+      fetchLastDate() // updates the "Data Last Fetched" display
+      emit('fetch-complete') // updates DataChecker.vue via App.vue
     } else {
       message.value = "Error: " + (res.data.output || res.data.message)
     }
