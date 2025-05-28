@@ -97,6 +97,7 @@ def stock_100():
     ]
     return result
 
+
 @app.get("/stock-stats")
 def stock_stats():
     print("Fetching stock stats (count and date range)...")
@@ -119,12 +120,36 @@ def stock_stats():
     }
 
 
+@app.get("/last-fetch-date")
+def get_last_fetch_date():
+    response = supabase.table("fetch_metadata").select("value").eq("key", "last_fetch").single().execute()
+    if response.data:
+        return {"last_fetch": response.data["value"]}
+    else:
+        return {"last_fetch": None}
+    
+
 @app.post("/fetch-latest")
 def fetch_latest():
+    print(f"⚡ /fetch-latest triggered at {datetime.now()}")
+    today = datetime.today().strftime("%Y-%m-%d")
+
+    # Get the last fetch date from Supabase
+    response = supabase.table("fetch_metadata").select("value").eq("key", "last_fetch").single().execute()
+    last_fetch = response.data["value"] if response.data else "2000-01-01"
+
+    if last_fetch == today:
+        print("🚫 API already used today — blocking fetch.")
+        return {"status": "error", "message": "API already called today."}
+
     try:
         print("Triggering direct fetch_and_upload call...")
-        uploaded = fetch_and_upload()  # now runs in-process
+        uploaded = fetch_and_upload()
         print(f"Returning uploaded count: {uploaded}")
+
+        # Update last fetch date in Supabase
+        supabase.table("fetch_metadata").update({"value": today}).eq("key", "last_fetch").execute()
+
         return {"status": "success", "uploaded": uploaded}
     except Exception as e:
         return {"status": "error", "message": str(e)}

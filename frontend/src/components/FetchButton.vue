@@ -3,6 +3,9 @@
     <p class="description">
       Manual button to retrieve the latest stock data to circumnavigate payment required for setting up daily job which would automate this.
     </p>
+    <p class="last-fetch" v-if="lastFetchDate">
+      📅 Data Last Fetched: {{ lastFetchDate }}
+    </p>
     <button @click="fetchData" :disabled="loading">
       {{ loading ? 'Fetching...' : 'Fetch Latest Stock Data' }}
     </button>
@@ -16,7 +19,17 @@ import axios from 'axios'
 
 const loading = ref(false)
 const message = ref('')
+const lastFetchDate = ref(null)
 const emit = defineEmits(['fetch-complete'])
+
+const fetchLastDate = async () => {
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/last-fetch-date`)
+    lastFetchDate.value = res.data.last_fetch
+  } catch (err) {
+    console.error("Failed to load last fetch date", err)
+  }
+}
 
 const fetchData = async () => {
   loading.value = true
@@ -41,6 +54,12 @@ const fetchData = async () => {
 
   loading.value = false
 }
+
+// load last fetch date on mount
+onMounted(() => {
+  fetchLastDate()
+})
+
 </script>
 
 <style scoped>

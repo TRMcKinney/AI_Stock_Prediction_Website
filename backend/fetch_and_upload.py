@@ -29,7 +29,8 @@ def get_daily_stock_data(symbol: str):
         "apikey": ALPHA_VANTAGE_API_KEY
     }
 
-    print(f"Fetching data from Alpha Vantage for {symbol}...")
+    print(f"Requesting Alpha Vantage with: {url} | params={params}")
+    
     r = requests.get(url, params=params)
     data = r.json()
 
