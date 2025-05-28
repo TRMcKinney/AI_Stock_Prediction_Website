@@ -5,17 +5,25 @@
       <span :class="statusClass">●</span>
       {{ message }}
     </p>
+    <button @click="checkBackend" :disabled="loading">
+      {{ loading ? "Waking up..." : "Wake Backend" }}
+    </button>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import axios from 'axios'
 
 const message = ref("Checking backend...")
 const statusClass = ref("status-loading")
+const loading = ref(false)
 
-onMounted(async () => {
+const checkBackend = async () => {
+  loading.value = true
+  message.value = "Checking backend..."
+  statusClass.value = "status-loading"
+
   try {
     await axios.get(`${import.meta.env.VITE_API_BASE_URL}/ping`)
     message.value = "Backend connected"
@@ -25,8 +33,14 @@ onMounted(async () => {
     message.value = "Backend not reachable"
     statusClass.value = "status-error"
   }
-})
+
+  loading.value = false
+}
+
+// Run once on mount
+checkBackend()
 </script>
+
 
 <style scoped>
 .status-ok {
@@ -38,4 +52,21 @@ onMounted(async () => {
 .status-error {
   color: red;
 }
+
+button {
+  margin-top: 0.5rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #999;
+  cursor: wait;
+}
 </style>
+
