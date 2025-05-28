@@ -1,5 +1,5 @@
 <template>
-  <div class="card connection-status">
+  <div class="connection-status">
     <h2>Connection Status (Backend)</h2>
     <p>
       <span :class="statusClass">●</span>
@@ -29,13 +29,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.card {
-  padding: 1rem;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1rem;
-}
 .status-ok {
   color: green;
 }
