@@ -23,6 +23,9 @@
 
         <div class="right-column">
           <div class="card">
+            <ConnectionStatus />
+          </div>
+          <div class="card">
             <StockChart />
           </div>
           <div class="card">
@@ -61,6 +64,7 @@ import FetchButton from './components/FetchButton.vue'
 import DataChecker from './components/DataChecker.vue'
 import PredictionDetails from './components/PredictionDetails.vue'
 import Modal from './components/Modal.vue'
+import ConnectionStatus from './components/ConnectionStatus.vue'
 
 const rowCountTrigger = ref(0)
 function handleFetchComplete() {

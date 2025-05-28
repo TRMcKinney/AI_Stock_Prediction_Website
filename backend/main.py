@@ -153,3 +153,9 @@ def fetch_latest():
         return {"status": "success", "uploaded": uploaded}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+   
+@app.get("/ping")
+def ping():
+    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+
