@@ -29,7 +29,7 @@
             <StockChart />
           </div>
           <div class="card">
-            <FetchButton />
+            <FetchButton :fetchCount="fetchCount" />
           </div>
           <div class="card">
             <DataChecker />
@@ -61,7 +61,7 @@
 
 
 <script setup>
-import { ref, provide, watch } from 'vue'
+import { ref, provide, watch, onMounted } from 'vue'
 
 import PredictButton from './components/PredictButton.vue'
 import PredictionTable from './components/PredictionTable.vue'
@@ -74,12 +74,6 @@ import PredictionDetails from './components/PredictionDetails.vue'
 import Modal from './components/Modal.vue'
 import ConnectionStatus from './components/ConnectionStatus.vue'
 import FetchLogsModal from './components/FetchLogsModal.vue'
-
-// Used by DataChecker.vue to refetch row count after prediction or fetch
-const rowCountTrigger = ref(0)
-function handleFetchComplete() {
-  rowCountTrigger.value++
-}
 
 // === PREDICTION MODAL ===
 const showModal = ref(false)
@@ -95,19 +89,46 @@ const triggerPrediction = async () => {
 
 provide('triggerPrediction', triggerPrediction)
 
-// === FETCH LOGS MODAL ===
-const showFetchLogs = ref(false)
-
-// Only expose trigger function globally
-provide('triggerFetchLogs', () => {
-  showFetchLogs.value = true
-})
-
-// Prevent background scrolling when modal is open
 watch(showModal, (isOpen) => {
   document.body.style.overflow = isOpen ? 'hidden' : 'auto'
 })
+
+// === FETCH LOGS MODAL ===
+const showFetchLogs = ref(false)
+const fetchCount = ref(null)
+
+const triggerFetchLogs = () => {
+  showFetchLogs.value = true
+  getFetchCount()
+}
+
+provide('triggerFetchLogs', triggerFetchLogs)
+provide('fetchCount', fetchCount)
+
+// === Row count trigger for DataChecker.vue ===
+const rowCountTrigger = ref(0)
+function handleFetchComplete() {
+  rowCountTrigger.value++
+  getFetchCount()
+}
+
+// === Fetch API usage count from backend ===
+const getFetchCount = async () => {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/fetch-count`)
+    const json = await res.json()
+    fetchCount.value = json.count
+  } catch (err) {
+    fetchCount.value = null
+  }
+}
+
+// Load fetch count on first mount
+onMounted(() => {
+  getFetchCount()
+})
 </script>
+
 
 
 
