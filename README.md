@@ -7,3 +7,19 @@ Now will incorporate continuous learning based on users past predictions (model 
 - Front End (Vue, hosted on Netlify)
 - Back End (FastAPI, hosted on Render)
 - Database (Supabase - PostgreSQL)
+
+
+# Notes on Architecture
+
+bulk_load_full_history.py = 
+
+fetch_and_upload.py = 
+
+main.py = 
+
+model.py = 
+
+
+
+
+FetchLogsModal.vue = A pop up window for when you click the 'Fetch Latest Stock Data' button for a terminal with printouts of the process of the print statements of the fetch_and_upload.py

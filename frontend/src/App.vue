@@ -46,15 +46,23 @@
       </div>
     </Modal>
 
-  </div>
+    <FetchLogsModal
+      v-if="showFetchLogs"
+      :logLines="fetchLogLines"
+      @close="showFetchLogs = false"
+    />
+
+    </div>
 </template>
 
 
 
-<script setup>
 
-import { watch } from 'vue'
-import { ref, provide } from 'vue'
+
+
+<script setup>
+import { ref, provide, watch } from 'vue'
+
 import PredictButton from './components/PredictButton.vue'
 import PredictionTable from './components/PredictionTable.vue'
 import StockChart from './components/StockChart.vue'
@@ -65,15 +73,17 @@ import DataChecker from './components/DataChecker.vue'
 import PredictionDetails from './components/PredictionDetails.vue'
 import Modal from './components/Modal.vue'
 import ConnectionStatus from './components/ConnectionStatus.vue'
+import FetchLogsModal from './components/FetchLogsModal.vue'
 
+// Used by DataChecker.vue to refetch row count after prediction or fetch
 const rowCountTrigger = ref(0)
 function handleFetchComplete() {
-  rowCountTrigger.value++  // triggers DataChecker to refetch from Supabase
+  rowCountTrigger.value++
 }
 
+// === PREDICTION MODAL ===
 const showModal = ref(false)
 const modalMessage = ref('Running prediction...')
-
 const predictionDetailsRef = ref(null)
 
 const triggerPrediction = async () => {
@@ -85,11 +95,23 @@ const triggerPrediction = async () => {
 
 provide('triggerPrediction', triggerPrediction)
 
+// === FETCH LOGS MODAL ===
+const showFetchLogs = ref(false)
+
+// Only expose trigger function globally
+provide('triggerFetchLogs', () => {
+  showFetchLogs.value = true
+})
+
+// Prevent background scrolling when modal is open
 watch(showModal, (isOpen) => {
   document.body.style.overflow = isOpen ? 'hidden' : 'auto'
 })
-
 </script>
+
+
+
+
 
 
 

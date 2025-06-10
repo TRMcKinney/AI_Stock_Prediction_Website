@@ -14,8 +14,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineEmits } from 'vue'
+import { inject, ref, onMounted} from 'vue'
 import axios from 'axios'
+const fetchWithLogs = inject('triggerFetchLogs')
 
 const loading = ref(false)
 const message = ref('')
@@ -31,29 +32,8 @@ const fetchLastDate = async () => {
   }
 }
 
-const fetchData = async () => {
-  loading.value = true
-  message.value = ''
-
-  try {
-    const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/fetch-latest`)
-    if (res.data.status === "success") {
-      const count = res.data.uploaded ?? 0
-      message.value =
-        count > 0
-          ? `Data fetch successful! ${count} records uploaded.`
-          : `No new records — data is already up to date.`
-      fetchLastDate() // updates the "Data Last Fetched" display
-      emit('fetch-complete') // updates DataChecker.vue via App.vue
-    } else {
-      message.value = "Error: " + (res.data.output || res.data.message)
-    }
-  } catch (err) {
-    console.error(err)
-    message.value = "Server error."
-  }
-
-  loading.value = false
+const fetchData = () => {
+  fetchWithLogs()
 }
 
 // load last fetch date on mount

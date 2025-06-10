@@ -13,6 +13,7 @@ import subprocess
 import pandas as pd
 from model import train_and_predict
 from fetch_and_upload import fetch_and_upload
+from fastapi.responses import StreamingResponse
 
 # Load environment variables from .env
 load_dotenv()
@@ -153,6 +154,25 @@ def fetch_latest():
         return {"status": "success", "uploaded": uploaded}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+
+@app.post("/fetch-latest-stream")
+def fetch_latest_stream():
+    def stream_logs():
+        yield "📡 Fetching data from Alpha Vantage...\n"
+        process = subprocess.Popen(
+            [sys.executable, "fetch_and_upload.py"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
+        )
+        for line in process.stdout:
+            yield line
+        process.wait()
+        yield f"\n✅ Done. Exit code: {process.returncode}"
+
+    return StreamingResponse(stream_logs(), media_type="text/plain")
+
 
    
 @app.get("/ping")
