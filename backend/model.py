@@ -151,7 +151,10 @@ def train_and_predict(df: pd.DataFrame):
     # === Model evaluation metrics ===
     r2 = r2_score(y_test, preds_test)
     mae = mean_absolute_error(y_test, preds_test)
-    rmse = mean_squared_error(y_test, preds_test, squared=False)
+    try:
+        rmse = mean_squared_error(y_test, preds_test, squared=False)
+    except TypeError:
+        rmse = np.sqrt(mean_squared_error(y_test, preds_test))
 
     # === Feature importance via permutation ===
     baseline = r2
