@@ -47,7 +47,7 @@
     </main>
 
     <Modal v-if="showModal">
-      <PredictionProgress @complete="handlePredictionComplete" />
+      <PredictionProgress :models="selectedModels" @complete="handlePredictionComplete" />
     </Modal>
 
     <FetchLogsModal
@@ -87,8 +87,10 @@ const predictionDetailsRef = ref(null)
 const predictionPlotUrl = ref('')
 const featureImportanceUrl = ref('')
 const allMetrics = ref({})
+const selectedModels = ref([])
 
-const triggerPrediction = () => {
+const triggerPrediction = (models) => {
+  selectedModels.value = models
   showModal.value = true
 }
 
