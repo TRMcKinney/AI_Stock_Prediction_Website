@@ -1,7 +1,7 @@
 <template>
     <div class="modal">
       <div class="modal-content">
-        <button class="close-button" @click="$emit('close')">×</button>
+        <button class="close-button" @click="emit('close')">×</button>
         <h3>Fetch Logs</h3>
         <pre class="log-output">
           <code>{{ logs.join('') }}</code>
@@ -10,8 +10,10 @@
     </div>
   </template>
   
-  <script setup>
-  import { ref, onMounted } from 'vue'
+<script setup>
+import { ref, onMounted } from 'vue'
+
+const emit = defineEmits(['close'])
   
   const logs = ref([])
   
@@ -37,7 +39,7 @@
     // Optional: auto-close after delay
     setTimeout(() => {
       // emit close only if modal is still visible
-      if (logs.value.length > 0) $emit('close')
+      if (logs.value.length > 0) emit('close')
     }, 3000)
   })
   </script>
