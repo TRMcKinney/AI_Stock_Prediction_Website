@@ -2,7 +2,7 @@ import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Suppress TensorFlow warnings
 
 import sys
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client
 from dotenv import load_dotenv
@@ -49,37 +49,41 @@ def root():
     return {"message": f"FastAPI + Alpha Vantage backend for {STOCK_SYMBOL}"}
 
 @app.get("/predict")
-def predict():
+def predict(models: str = Query("")):
     response = supabase.table("stock_prices").select("*").order("timestamp").execute()
     df = pd.DataFrame(response.data)
     if df.empty:
         return {"error": "No data available"}
+    available = {
+        "baseline": baseline_model.train_and_predict,
+        "cross_validation": cross_validation_model.train_and_predict,
+        "persist": persist_model.train_and_predict,
+        "grid_search": grid_search_model.train_and_predict,
+    }
+    selected = models.split(",") if models else available.keys()
     try:
-        return {
-            "baseline": baseline_model.train_and_predict(df),
-            "cross_validation": cross_validation_model.train_and_predict(df),
-            "persist": persist_model.train_and_predict(df),
-            "grid_search": grid_search_model.train_and_predict(df),
-        }
+        return {name: available[name](df) for name in selected if name in available}
     except ValueError as e:
         return {"error": str(e)}
 
 @app.get("/predict-stream")
-def predict_stream():
+def predict_stream(models: str = Query("")):
     def stream():
         response = supabase.table("stock_prices").select("*").order("timestamp").execute()
         df = pd.DataFrame(response.data)
         if df.empty:
             yield "ERROR:No data available\n"
             return
-        models = [
-            ("baseline", baseline_model.train_and_predict),
-            ("cross_validation", cross_validation_model.train_and_predict),
-            ("persist", persist_model.train_and_predict),
-            ("grid_search", grid_search_model.train_and_predict),
-        ]
+        available = {
+            "baseline": baseline_model.train_and_predict,
+            "cross_validation": cross_validation_model.train_and_predict,
+            "persist": persist_model.train_and_predict,
+            "grid_search": grid_search_model.train_and_predict,
+        }
+        selected = models.split(",") if models else available.keys()
+        model_list = [(name, available[name]) for name in selected if name in available]
         results = {}
-        for name, fn in models:
+        for name, fn in model_list:
             yield f"START:{name}\n"
             try:
                 results[name] = fn(df)

@@ -3,37 +3,68 @@
     <p>Running prediction...</p>
     <ul>
       <li v-for="m in models" :key="m.name">
-        <label>
-          <input type="checkbox" disabled :checked="m.done" />
-          {{ m.label }}
-        </label>
+        <span class="model-label">{{ m.label }}:</span>
+        <span class="status" :class="m.status">
+          <template v-if="m.status === 'running'">Running...</template>
+          <template v-else-if="m.status === 'done'">
+            Done<span v-if="m.duration"> ({{ m.duration.toFixed(1) }}s)</span>
+          </template>
+          <template v-else>Pending</template>
+        </span>
       </li>
     </ul>
-    <div class="loader"></div>
+    <div v-if="!allDone && !error" class="loader"></div>
     <p v-if="error" class="error">{{ error }}</p>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+
+const props = defineProps({
+  models: {
+    type: Array,
+    default: () => ['baseline', 'cross_validation', 'persist', 'grid_search']
+  }
+})
 
 const emit = defineEmits(['complete'])
 
-const models = ref([
-  { name: 'baseline', label: 'Baseline', done: false },
-  { name: 'cross_validation', label: 'Cross Validation', done: false },
-  { name: 'persist', label: 'Persisted', done: false },
-  { name: 'grid_search', label: 'Grid Search', done: false }
-])
+const labelMap = {
+  baseline: 'Baseline',
+  cross_validation: 'Cross Validation',
+  persist: 'Persisted',
+  grid_search: 'Grid Search'
+}
+const models = ref(
+  props.models.map((m) => ({
+    name: m,
+    label: labelMap[m] || m,
+    status: 'pending',
+    start: null,
+    duration: null,
+  }))
+)
 
 const results = ref(null)
 const error = ref('')
+const allDone = computed(() => models.value.every((m) => m.status === 'done'))
 
 function processLine(line) {
-  if (line.startsWith('END:')) {
+  if (line.startsWith('START:')) {
+    const name = line.slice(6)
+    const m = models.value.find((x) => x.name === name)
+    if (m) {
+      m.status = 'running'
+      m.start = Date.now()
+    }
+  } else if (line.startsWith('END:')) {
     const name = line.slice(4)
-    const m = models.value.find(x => x.name === name)
-    if (m) m.done = true
+    const m = models.value.find((x) => x.name === name)
+    if (m) {
+      m.status = 'done'
+      if (m.start) m.duration = (Date.now() - m.start) / 1000
+    }
   } else if (line.startsWith('RESULTS:')) {
     try {
       results.value = JSON.parse(line.slice(8))
@@ -47,7 +78,8 @@ function processLine(line) {
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/predict-stream`)
+    const query = encodeURIComponent(props.models.join(','))
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/predict-stream?models=${query}`)
     const reader = res.body.getReader()
     const decoder = new TextDecoder('utf-8')
     let buffer = ''
@@ -77,6 +109,19 @@ ul {
 }
 li {
   margin: 0.25rem 0;
+}
+.model-label {
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+.status.done {
+  color: green;
+}
+.status.running {
+  color: #410093;
+}
+.status.pending {
+  color: #666;
 }
 .loader {
   margin: 1rem auto;

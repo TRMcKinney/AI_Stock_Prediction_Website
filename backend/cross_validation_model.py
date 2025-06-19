@@ -16,7 +16,8 @@ def train_and_predict(df: pd.DataFrame):
     scaler = StandardScaler()
     scaled = scaler.fit_transform(features)
 
-    tss = TimeSeriesSplit(n_splits=5)
+    # Fewer splits and epochs keep training time reasonable for the demo
+    tss = TimeSeriesSplit(n_splits=3)
     r2_scores = []
     mae_scores = []
     rmse_scores = []
@@ -30,7 +31,7 @@ def train_and_predict(df: pd.DataFrame):
             Dense(1, activation="linear"),
         ])
         model.compile(optimizer="adam", loss="mse")
-        model.fit(X_train, y_train, epochs=25, verbose=0)
+        model.fit(X_train, y_train, epochs=15, verbose=0)
 
         preds = model.predict(X_test)
         r2_scores.append(r2_score(y_test, preds))
@@ -44,7 +45,7 @@ def train_and_predict(df: pd.DataFrame):
         Dense(1, activation="linear"),
     ])
     final_model.compile(optimizer="adam", loss="mse")
-    final_model.fit(scaled, targets, epochs=25, verbose=0)
+    final_model.fit(scaled, targets, epochs=15, verbose=0)
     latest_pred = final_model.predict(scaled[-1].reshape(1, -1))[0][0]
 
     return {
