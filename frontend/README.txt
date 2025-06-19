@@ -1,5 +1,5 @@
-Install Node.js - | https://nodejs.org/en |
+Install Node.js from <https://nodejs.org/en>.
 
 Running locally:
-- "npm install" (if first time)
-- "npm run dev" in terminal in frontend folder
+- `npm install` (first time only)
+- `npm run dev`

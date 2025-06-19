@@ -1,3 +1,4 @@
 Run locally:
-- activate venv in terminal 
-- "uvicorn main:app --reload" in terminal in backend folder
+- Create and activate a virtual environment.
+- Install dependencies with `pip install -r requirements.txt`.
+- Start the server with `uvicorn main:app --reload`.
