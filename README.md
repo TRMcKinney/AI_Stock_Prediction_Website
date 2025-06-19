@@ -63,7 +63,7 @@ The model training routine expects at least 210 rows of stock price data so that
 
 - Make data checker into a button for manual checking – the automatic function when fetching new data doesn't seem to work
 - Have a model selector dropdown to select version of the predicting model
-  - basic neural network LSTM (the current one) – although needs fine tuning still
+  - basic feed-forward neural network (the current one) – although needs fine tuning still
   - LSTM with memory
   - LSTM with memory and sentiment analysis module
 - Then will need new database table to track predictions and by which model
