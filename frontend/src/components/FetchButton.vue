@@ -19,7 +19,6 @@
     <FetchLogsModal
       v-if="showModal"
       @close="handleModalClose"
-      :onRefreshCount="refreshFetchCount"
     />
 
     <p v-if="message" class="status">{{ message }}</p>
@@ -27,7 +26,7 @@
 </template>
 
 <script setup>
-import { inject, ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import FetchLogsModal from './FetchLogsModal.vue'
 
@@ -38,8 +37,6 @@ const fetchCount = ref(null)
 const showModal = ref(false)
 
 const emit = defineEmits(['fetch-complete'])
-
-const fetchWithLogs = inject('triggerFetchLogs')  // Not used anymore (replaced by modal toggle)
 
 const fetchLastDate = async () => {
   try {
