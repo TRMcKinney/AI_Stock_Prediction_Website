@@ -9,9 +9,24 @@
       <h3>Feature Importance</h3>
       <img :src="featureImportanceUrl" alt="Feature importance plot" />
     </div>
-    <p>R2 Score: {{ r2.toFixed(3) }}</p>
-    <p>MAE: {{ mae.toFixed(3) }}</p>
-    <p>RMSE: {{ rmse.toFixed(3) }}</p>
+    <table v-if="Object.keys(metrics).length">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>R2</th>
+          <th>MAE</th>
+          <th>RMSE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(m, name) in metrics" :key="name">
+          <td>{{ name }}</td>
+          <td>{{ m.r2.toFixed(3) }}</td>
+          <td>{{ m.mae.toFixed(3) }}</td>
+          <td>{{ m.rmse.toFixed(3) }}</td>
+        </tr>
+      </tbody>
+    </table>
     <div v-if="!plotUrl" class="placeholder"></div>
   </div>
 </template>
@@ -26,17 +41,9 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  r2: {
-    type: Number,
-    default: 0
-  },
-  mae: {
-    type: Number,
-    default: 0
-  },
-  rmse: {
-    type: Number,
-    default: 0
+  metrics: {
+    type: Object,
+    default: () => ({})
   }
 })
 </script>
@@ -50,5 +57,15 @@ const props = defineProps({
 }
 .metric {
   margin-top: 1rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+th, td {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  text-align: center;
 }
 </style>

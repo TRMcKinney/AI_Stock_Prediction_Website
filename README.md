@@ -20,6 +20,8 @@ This project demonstrates a simple stock prediction web application. The fronten
 
 `fetch_and_upload.py` downloads prices from Alpha Vantage and saves new rows to Supabase, enforcing a 25‑request daily limit. `bulk_load_full_history.py` can populate the database with historical prices.
 
+The persisted model variant stores its weights and scaler in a Supabase table named `persistence_model`. On first run the table is populated with base64 encoded blobs so later predictions reuse the same model even after the backend restarts.
+
 ## Frontend overview
 
 The Vue app displays prediction results and recent stock data. Key components include:

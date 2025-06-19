@@ -20,9 +20,7 @@
             <PredictionInside
               :plotUrl="predictionPlotUrl"
               :featureImportanceUrl="featureImportanceUrl"
-              :r2="r2"
-              :mae="mae"
-              :rmse="rmse"
+              :metrics="allMetrics"
             />
           </div>
           <div class="card">
@@ -91,9 +89,7 @@ const modalMessage = ref('Running prediction...')
 const predictionDetailsRef = ref(null)
 const predictionPlotUrl = ref('')
 const featureImportanceUrl = ref('')
-const r2 = ref(0)
-const mae = ref(0)
-const rmse = ref(0)
+const allMetrics = ref({})
 
 const triggerPrediction = async () => {
   showModal.value = true
@@ -101,9 +97,7 @@ const triggerPrediction = async () => {
   const result = await predictionDetailsRef.value?.updatePrediction()
   predictionPlotUrl.value = result?.plotUrl || ''
   featureImportanceUrl.value = result?.featureImportanceUrl || ''
-  r2.value = result?.r2 || 0
-  mae.value = result?.mae || 0
-  rmse.value = result?.rmse || 0
+  allMetrics.value = result?.metrics || {}
   showModal.value = false
 }
 

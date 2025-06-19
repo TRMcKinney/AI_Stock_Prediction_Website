@@ -9,7 +9,10 @@ from dotenv import load_dotenv
 from datetime import datetime
 import subprocess
 import pandas as pd
-from model import train_and_predict
+import baseline_model
+import cross_validation_model
+import persist_model
+import grid_search_model
 from fetch_and_upload import fetch_and_upload
 from fastapi.responses import StreamingResponse
 
@@ -51,7 +54,12 @@ def predict():
     if df.empty:
         return {"error": "No data available"}
     try:
-        return train_and_predict(df)
+        return {
+            "baseline": baseline_model.train_and_predict(df),
+            "cross_validation": cross_validation_model.train_and_predict(df),
+            "persist": persist_model.train_and_predict(df),
+            "grid_search": grid_search_model.train_and_predict(df),
+        }
     except ValueError as e:
         return {"error": str(e)}
 
