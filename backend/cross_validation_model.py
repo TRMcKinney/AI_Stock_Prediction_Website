@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 
-from baseline_model import compute_features, MIN_REQUIRED_ROWS
+from baseline_model import compute_features
 
 
 def train_and_predict(df: pd.DataFrame):
