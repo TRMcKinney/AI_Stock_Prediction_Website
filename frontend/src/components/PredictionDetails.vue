@@ -25,15 +25,19 @@ const predictions = ref({})
 const plotUrl = ref('')
 const featureImportanceUrl = ref('')
 
+
 async function updatePrediction() {
   const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/predict`)
   const data = await res.json()
+  return setPredictionData(data)
+}
 
-  if (data.error) {
+function setPredictionData(data) {
+  if (!data || data.error) {
     predictions.value = {}
     plotUrl.value = ''
     featureImportanceUrl.value = ''
-    alert(`Prediction failed: ${data.error}`)
+    if (data && data.error) alert(`Prediction failed: ${data.error}`)
     return {
       plotUrl: '',
       featureImportanceUrl: '',
@@ -53,7 +57,7 @@ async function updatePrediction() {
   }
 }
 
-defineExpose({ updatePrediction, plotUrl, featureImportanceUrl, predictions })
+defineExpose({ updatePrediction, setPredictionData, plotUrl, featureImportanceUrl, predictions })
 </script>
 
 <style scoped>

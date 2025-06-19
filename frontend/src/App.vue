@@ -47,10 +47,7 @@
     </main>
 
     <Modal v-if="showModal">
-      <div>
-        <p>{{ modalMessage }}</p>
-        <div class="loader"></div>
-      </div>
+      <PredictionProgress @complete="handlePredictionComplete" />
     </Modal>
 
     <FetchLogsModal
@@ -79,28 +76,30 @@ import FetchButton from './components/FetchButton.vue'
 import DataChecker from './components/DataChecker.vue'
 import PredictionDetails from './components/PredictionDetails.vue'
 import PredictionInside from './components/PredictionInside.vue'
+import PredictionProgress from './components/PredictionProgress.vue'
 import Modal from './components/Modal.vue'
 import ConnectionStatus from './components/ConnectionStatus.vue'
 import FetchLogsModal from './components/FetchLogsModal.vue'
 
 // === PREDICTION MODAL ===
 const showModal = ref(false)
-const modalMessage = ref('Running prediction...')
 const predictionDetailsRef = ref(null)
 const predictionPlotUrl = ref('')
 const featureImportanceUrl = ref('')
 const allMetrics = ref({})
 
-const triggerPrediction = async () => {
+const triggerPrediction = () => {
   showModal.value = true
-  modalMessage.value = 'Running prediction...'
-  const result = await predictionDetailsRef.value?.updatePrediction()
-  predictionPlotUrl.value = result?.plotUrl || ''
-  featureImportanceUrl.value = result?.featureImportanceUrl || ''
-  allMetrics.value = result?.metrics || {}
-  showModal.value = false
 }
 
+function handlePredictionComplete(result) {
+  predictionDetailsRef.value?.setPredictionData(result || {})
+  const baseline = result?.baseline || {}
+  predictionPlotUrl.value = baseline.plot_base64 ? `data:image/png;base64,${baseline.plot_base64}` : ''
+  featureImportanceUrl.value = baseline.importance_plot_base64 ? `data:image/png;base64,${baseline.importance_plot_base64}` : ''
+  allMetrics.value = result || {}
+  showModal.value = false
+}
 provide('triggerPrediction', triggerPrediction)
 
 watch(showModal, (isOpen) => {
