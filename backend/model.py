@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 import matplotlib.pyplot as plt
@@ -148,7 +148,37 @@ def train_and_predict(df: pd.DataFrame):
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')
     plt.close()
 
+    # === Model evaluation metrics ===
+    r2 = r2_score(y_test, preds_test)
+    mae = mean_absolute_error(y_test, preds_test)
+    rmse = mean_squared_error(y_test, preds_test, squared=False)
+
+    # === Feature importance via permutation ===
+    baseline = r2
+    importances = []
+    for i in range(X_test.shape[1]):
+        X_perm = X_test.copy()
+        np.random.shuffle(X_perm[:, i])
+        perm_preds = model.predict(X_perm)
+        score = r2_score(y_test, perm_preds)
+        importances.append(baseline - score)
+
+    plt.figure()
+    plt.bar(range(len(importances)), importances)
+    plt.xticks(range(len(importances)), features.columns, rotation=45, ha='right')
+    plt.ylabel('Importance (ΔR²)')
+    plt.tight_layout()
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    importance_base64 = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close()
+
     return {
         "prediction": float(latest_prediction),
-        "plot_base64": img_base64
+        "plot_base64": img_base64,
+        "r2": float(r2),
+        "mae": float(mae),
+        "rmse": float(rmse),
+        "importance_plot_base64": importance_base64,
     }
