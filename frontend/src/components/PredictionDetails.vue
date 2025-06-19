@@ -1,56 +1,69 @@
 <template>
   <div>
     <h2>Prediction</h2>
-    <p>Predicted % change in 10 days: <strong>{{ prediction.toFixed(2) }}%</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>% Change (10d)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(m, name) in predictions" :key="name">
+          <td>{{ name }}</td>
+          <td>{{ m.prediction.toFixed(2) }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 
-const prediction = ref(0)
+const predictions = ref({})
 const plotUrl = ref('')
 const featureImportanceUrl = ref('')
-const r2 = ref(0)
-const mae = ref(0)
-const rmse = ref(0)
 
 async function updatePrediction() {
   const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/predict`)
   const data = await res.json()
-  
+
   if (data.error) {
-    prediction.value = 0
+    predictions.value = {}
     plotUrl.value = ''
     featureImportanceUrl.value = ''
-    r2.value = 0
-    mae.value = 0
-    rmse.value = 0
     alert(`Prediction failed: ${data.error}`)
     return {
       plotUrl: '',
       featureImportanceUrl: '',
-      r2: 0,
-      mae: 0,
-      rmse: 0
+      metrics: {}
     }
   }
 
-  prediction.value = data.prediction
-  plotUrl.value = `data:image/png;base64,${data.plot_base64}`
-  featureImportanceUrl.value = `data:image/png;base64,${data.importance_plot_base64}`
-  r2.value = data.r2
-  mae.value = data.mae
-  rmse.value = data.rmse
+  predictions.value = data
+  const baseline = data.baseline || {}
+  plotUrl.value = baseline.plot_base64 ? `data:image/png;base64,${baseline.plot_base64}` : ''
+  featureImportanceUrl.value = baseline.importance_plot_base64 ? `data:image/png;base64,${baseline.importance_plot_base64}` : ''
+
   return {
     plotUrl: plotUrl.value,
     featureImportanceUrl: featureImportanceUrl.value,
-    r2: r2.value,
-    mae: mae.value,
-    rmse: rmse.value
+    metrics: data
   }
 }
 
-// allow this to be triggered externally
-defineExpose({ updatePrediction, plotUrl, featureImportanceUrl, r2, mae, rmse })
+defineExpose({ updatePrediction, plotUrl, featureImportanceUrl, predictions })
 </script>
+
+<style scoped>
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+</style>
