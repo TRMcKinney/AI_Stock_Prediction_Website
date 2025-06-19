@@ -17,6 +17,9 @@
             <PredictionDetails ref="predictionDetailsRef" />
           </div>
           <div class="card">
+            <PredictionInside :plotUrl="predictionPlotUrl" />
+          </div>
+          <div class="card">
             <PredictionTable />
           </div>
         </div>
@@ -71,6 +74,7 @@ import Header from './components/Header.vue'
 import FetchButton from './components/FetchButton.vue'
 import DataChecker from './components/DataChecker.vue'
 import PredictionDetails from './components/PredictionDetails.vue'
+import PredictionInside from './components/PredictionInside.vue'
 import Modal from './components/Modal.vue'
 import ConnectionStatus from './components/ConnectionStatus.vue'
 import FetchLogsModal from './components/FetchLogsModal.vue'
@@ -79,11 +83,13 @@ import FetchLogsModal from './components/FetchLogsModal.vue'
 const showModal = ref(false)
 const modalMessage = ref('Running prediction...')
 const predictionDetailsRef = ref(null)
+const predictionPlotUrl = ref('')
 
 const triggerPrediction = async () => {
   showModal.value = true
   modalMessage.value = 'Running prediction...'
-  await predictionDetailsRef.value?.updatePrediction()
+  const result = await predictionDetailsRef.value?.updatePrediction()
+  predictionPlotUrl.value = result?.plotUrl || ''
   showModal.value = false
 }
 

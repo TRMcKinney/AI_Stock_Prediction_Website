@@ -2,7 +2,6 @@
   <div>
     <h2>Prediction Details</h2>
     <p>Predicted % change in 10 days: <strong>{{ prediction.toFixed(2) }}%</strong></p>
-    <img :src="plotUrl" alt="Prediction scatter plot" v-if="plotUrl" />
   </div>
 </template>
 
@@ -20,13 +19,14 @@ async function updatePrediction() {
     prediction.value = 0
     plotUrl.value = ''
     alert(`Prediction failed: ${data.error}`)
-    return
+    return { plotUrl: '' }
   }
     
   prediction.value = data.prediction
   plotUrl.value = `data:image/png;base64,${data.plot_base64}`
+  return { plotUrl: plotUrl.value }
 }
 
 // allow this to be triggered externally
-defineExpose({ updatePrediction })
+defineExpose({ updatePrediction, plotUrl })
 </script>
