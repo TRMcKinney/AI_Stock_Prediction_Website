@@ -15,6 +15,7 @@ import persist_model
 import grid_search_model
 from fetch_and_upload import fetch_and_upload
 from fastapi.responses import StreamingResponse
+import json
 
 # Load env vars
 load_dotenv()
@@ -62,6 +63,33 @@ def predict():
         }
     except ValueError as e:
         return {"error": str(e)}
+
+@app.get("/predict-stream")
+def predict_stream():
+    def stream():
+        response = supabase.table("stock_prices").select("*").order("timestamp").execute()
+        df = pd.DataFrame(response.data)
+        if df.empty:
+            yield "ERROR:No data available\n"
+            return
+        models = [
+            ("baseline", baseline_model.train_and_predict),
+            ("cross_validation", cross_validation_model.train_and_predict),
+            ("persist", persist_model.train_and_predict),
+            ("grid_search", grid_search_model.train_and_predict),
+        ]
+        results = {}
+        for name, fn in models:
+            yield f"START:{name}\n"
+            try:
+                results[name] = fn(df)
+            except ValueError as e:
+                yield f"ERROR:{str(e)}\n"
+                return
+            yield f"END:{name}\n"
+        yield "RESULTS:" + json.dumps(results) + "\n"
+
+    return StreamingResponse(stream(), media_type="text/plain")
 
 @app.get("/stock-100")
 def stock_100():
