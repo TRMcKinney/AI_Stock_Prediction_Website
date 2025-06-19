@@ -8,6 +8,10 @@ import matplotlib.pyplot as plt
 import io
 import base64
 
+# Minimum number of rows required to compute all features. ``rsi200`` needs a
+# 200 day window and the model uses a 10-day look-back and 10-day forecast.
+MIN_REQUIRED_ROWS = 210
+
 def train_and_predict(df: pd.DataFrame):
     """Train model on historical prices and predict future percentage change.
 
@@ -26,6 +30,11 @@ def train_and_predict(df: pd.DataFrame):
 
     # Work on a copy so the caller's DataFrame remains untouched
     df = df.copy()
+
+    if len(df) < MIN_REQUIRED_ROWS:
+        raise ValueError(
+            f"Not enough data to compute features — at least {MIN_REQUIRED_ROWS} rows required."
+        )
 
     # Close price shifted 10 days forward. This becomes the "future" value we
     # want to predict based on information available today.
@@ -71,12 +80,13 @@ def train_and_predict(df: pd.DataFrame):
     ) * 100
 
     # Remove rows with missing values that resulted from the rolling
-    # computations.  A minimum of 200 days of data is needed to calculate
-    # the longest moving averages.
+    # computations.  Because ``rsi200`` relies on a 200 day window and we also
+    # calculate 10-day look-backs/forwards, at least 210 rows are required
+    # for a single row of usable features.
     df = df.dropna()
     if df.empty:
         raise ValueError(
-            "Not enough data to compute features — at least 200 rows required."
+            f"Not enough data to compute features — at least {MIN_REQUIRED_ROWS} rows required."
         )
 
     # Feature matrix and prediction target.  The network tries to predict

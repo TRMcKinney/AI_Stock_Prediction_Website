@@ -35,3 +35,10 @@ FetchLogsModal.vue = A pop up window for when you click the 'Fetch Latest Stock 
 - Table/visualisation for each models past results and their accuracy
 - New card with generic stock data analysis - (Balance Sheet values, total Revenue, Net Income, Operating Costs, Costs of Revenue, Operating Income, (Operating Income / Total Revenue) x 100, Earnings Per Share (EPS), Price-to-Earnings Ratio (P/E), Price to Sales Ratio (P/S), Debt to Equity Ratio, Return on Equity (ROE), Trend Analysis, Support and Resistance Levels, Moving Averages, Relative Strength Index (RSI), Valuation Metrics, Discounted Cash Fow (DCF) Analysis, Enterprise Value (EV/EBITDA), PEG Ratio)
       Another model version (LSTM with memory and sentiment analysis module and stock data analysis)?
+
+## Running tests
+Install dependencies from `backend/requirements.txt` and run `pytest` from the repository root.
+
+The model training routine expects at least 210 rows of data so long-term moving
+averages and 10-day look-backs can be computed.
+
