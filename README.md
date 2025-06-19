@@ -10,13 +10,24 @@ This project demonstrates a simple stock prediction web application. The fronten
 
 ## Backend overview
 
-`backend/main.py` exposes several endpoints:
+-`backend/main.py` exposes several endpoints:
 
-- **/predict** – train the model defined in `model.py` and return the latest prediction with a plot image.
+- **/predict** – train four model variants (baseline, cross validation, persisted, and grid search) and return their metrics.
 - **/stock-100** – serve the most recent 100 rows for charting.
 - **/stock-stats**, **/fetch-count**, **/last-fetch-date** – stats and API usage information.
 - **/fetch-latest-stream** – run `fetch_and_upload.py` in a subprocess and stream logs.
 - **/ping** – health check.
+
+Example `/predict` response structure:
+
+```json
+{
+  "baseline": { "prediction": 0.04, "r2": 0.32, "plot_base64": "..." },
+  "cross_validation": { "prediction": 0.03, "r2": 0.31, "mae": 0.22, "rmse": 0.27 },
+  "persist": { "prediction": 0.05, "r2": 0.33, "mae": 0.21, "rmse": 0.26 },
+  "grid_search": { "prediction": 0.06, "r2": 0.34, "mae": 0.20, "rmse": 0.25 }
+}
+```
 
 `fetch_and_upload.py` downloads prices from Alpha Vantage and saves new rows to Supabase, enforcing a 25‑request daily limit. `bulk_load_full_history.py` can populate the database with historical prices.
 
