@@ -14,6 +14,7 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense
 from supabase import create_client
+from postgrest.exceptions import APIError
 
 from baseline_model import compute_features
 
@@ -42,12 +43,18 @@ def _build_model(input_dim: int):
 
 def _load_persisted():
     """Return persisted (model, scaler) from Supabase or (None, None)."""
-    resp = (
-        supabase.table(TABLE_NAME)
-        .select("model", "scaler")
-        .maybe_single()
-        .execute()
-    )
+    try:
+        resp = (
+            supabase.table(TABLE_NAME)
+            .select("model", "scaler")
+            .maybe_single()
+            .execute()
+        )
+    except APIError as e:
+        # Supabase table may exist but have no rows yet which raises a 204 error
+        if getattr(e, "code", None) == "204":
+            return None, None
+        raise
     if resp and resp.data:
         model_bytes = base64.b64decode(resp.data["model"])
         scaler_bytes = base64.b64decode(resp.data["scaler"])
