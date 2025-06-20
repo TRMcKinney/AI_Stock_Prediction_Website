@@ -25,6 +25,10 @@ const props = defineProps({
   models: {
     type: Array,
     default: () => ['baseline', 'cross_validation', 'persist', 'grid_search']
+  },
+  abortSignal: {
+    type: Object,
+    default: null
   }
 })
 
@@ -79,21 +83,30 @@ function processLine(line) {
 onMounted(async () => {
   try {
     const query = encodeURIComponent(props.models.join(','))
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/predict-stream?models=${query}`)
-    const reader = res.body.getReader()
-    const decoder = new TextDecoder('utf-8')
-    let buffer = ''
-    while (true) {
-      const { value, done } = await reader.read()
-      if (done) break
-      buffer += decoder.decode(value, { stream: true })
-      const lines = buffer.split('\n')
-      buffer = lines.pop()
-      lines.forEach(processLine)
+    const res = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/predict-stream?models=${query}`,
+      { signal: props.abortSignal }
+    )
+    if (!res.ok) {
+      error.value = `Server error: ${res.status}`
+    } else {
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder('utf-8')
+      let buffer = ''
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop()
+        lines.forEach(processLine)
+      }
+      if (buffer) processLine(buffer)
     }
-    if (buffer) processLine(buffer)
   } catch (err) {
-    error.value = err.message
+    if (err.name !== 'AbortError') {
+      error.value = err.message
+    }
   }
   emit('complete', { results: results.value, error: error.value })
 })

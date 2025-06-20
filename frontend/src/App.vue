@@ -46,8 +46,12 @@
       </div>
     </main>
 
-    <Modal v-if="showModal">
-      <PredictionProgress :models="selectedModels" @complete="handlePredictionComplete" />
+    <Modal v-if="showModal" @close="closePredictionModal">
+      <PredictionProgress
+        :models="selectedModels"
+        :abortSignal="predictionAbortController?.signal"
+        @complete="handlePredictionComplete"
+      />
     </Modal>
 
     <FetchLogsModal
@@ -88,9 +92,11 @@ const predictionPlotUrl = ref('')
 const featureImportanceUrl = ref('')
 const allMetrics = ref({})
 const selectedModels = ref([])
+let predictionAbortController = null
 
 const triggerPrediction = (models) => {
   selectedModels.value = models
+  predictionAbortController = new AbortController()
   showModal.value = true
 }
 
@@ -106,6 +112,13 @@ function handlePredictionComplete({ results, error } = {}) {
   featureImportanceUrl.value = baseline.importance_plot_base64 ? `data:image/png;base64,${baseline.importance_plot_base64}` : ''
   allMetrics.value = results || {}
   showModal.value = false
+}
+
+function closePredictionModal() {
+  showModal.value = false
+  if (predictionAbortController) {
+    predictionAbortController.abort()
+  }
 }
 provide('triggerPrediction', triggerPrediction)
 
