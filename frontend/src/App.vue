@@ -94,12 +94,17 @@ const triggerPrediction = (models) => {
   showModal.value = true
 }
 
-function handlePredictionComplete(result) {
-  predictionDetailsRef.value?.setPredictionData(result || {})
-  const baseline = result?.baseline || {}
+function handlePredictionComplete({ results, error } = {}) {
+  if (error) {
+    // Keep modal open so the error message is visible
+    console.error('Prediction error:', error)
+    return
+  }
+  predictionDetailsRef.value?.setPredictionData(results || {})
+  const baseline = results?.baseline || {}
   predictionPlotUrl.value = baseline.plot_base64 ? `data:image/png;base64,${baseline.plot_base64}` : ''
   featureImportanceUrl.value = baseline.importance_plot_base64 ? `data:image/png;base64,${baseline.importance_plot_base64}` : ''
-  allMetrics.value = result || {}
+  allMetrics.value = results || {}
   showModal.value = false
 }
 provide('triggerPrediction', triggerPrediction)

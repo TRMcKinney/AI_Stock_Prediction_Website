@@ -95,7 +95,7 @@ onMounted(async () => {
   } catch (err) {
     error.value = err.message
   }
-  emit('complete', results.value)
+  emit('complete', { results: results.value, error: error.value })
 })
 </script>
 
