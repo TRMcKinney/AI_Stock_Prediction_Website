@@ -10,6 +10,7 @@ pip install -r backend/requirements.txt
 Install frontend dependencies with:
 
 ```
+cd frontend
 npm install
 ```
 
