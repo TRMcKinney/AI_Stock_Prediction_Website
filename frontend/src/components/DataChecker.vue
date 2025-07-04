@@ -1,19 +1,15 @@
 <template>
   <div>
-    <h2>Data Checker</h2>
-    <p>Total rows of data: <strong>{{ rowCount ?? 'Loading...' }}</strong></p>
-    <p>Data Date Range: <strong>{{ dateRange ?? 'Loading...' }}</strong></p>
+    <button class="data-checker-btn" @click="fetchStats">Data Checker</button>
+    <p>Total rows of data: <strong>{{ rowCount ?? '-' }}</strong></p>
+    <p>Data Date Range: <strong>{{ dateRange ?? '-' }}</strong></p>
   </div>
 </template>
 
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref } from 'vue'
 import axios from 'axios'
-
-const props = defineProps({
-  trigger: Number
-})
 
 const rowCount = ref(null)
 const dateRange = ref(null)
@@ -29,26 +25,27 @@ const fetchStats = async () => {
     dateRange.value = `${format(min_date)} – ${format(max_date)}`
 
   } catch (err) {
-    console.error("Error fetching stock stats:", err)
+    console.error('Error fetching stock stats:', err)
     rowCount.value = 'Error'
     dateRange.value = 'Error'
   }
 }
-
-// Fetch once on mount
-onMounted(() => {
-  fetchStats()
-})
-
-// Re-fetch on trigger change
-watch(() => props.trigger, () => {
-  fetchStats()
-})
 </script>
 
 <style scoped>
-h2 {
+.data-checker-btn {
+  display: block;
+  padding: 0.6rem 1.2rem;
   margin-bottom: 0.5rem;
+  font-size: 1rem;
+  background-color: #410093;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.data-checker-btn:hover {
+  background-color: #5e2db7;
 }
 p {
   font-size: 1rem;

@@ -138,13 +138,6 @@ const triggerFetchLogs = () => {
 provide('triggerFetchLogs', triggerFetchLogs)
 provide('fetchCount', fetchCount)
 
-// === Row count trigger for DataChecker.vue ===
-const rowCountTrigger = ref(0)
-function handleFetchComplete() {
-  rowCountTrigger.value++
-  getFetchCount()
-}
-
 // === Fetch API usage count from backend ===
 const getFetchCount = async () => {
   try {
