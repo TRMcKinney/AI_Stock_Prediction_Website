@@ -16,6 +16,7 @@ import grid_search_model
 from fetch_and_upload import fetch_and_upload
 from fastapi.responses import StreamingResponse
 import json
+from prediction_history import insert_predictions
 
 # Load env vars
 load_dotenv()
@@ -62,7 +63,9 @@ def predict(models: str = Query("")):
     }
     selected = models.split(",") if models else available.keys()
     try:
-        return {name: available[name](df) for name in selected if name in available}
+        results = {name: available[name](df) for name in selected if name in available}
+        insert_predictions(results, df["close"].iloc[-1])
+        return results
     except ValueError as e:
         return {"error": str(e)}
 
@@ -91,9 +94,21 @@ def predict_stream(models: str = Query("")):
                 yield f"ERROR:{str(e)}\n"
                 return
             yield f"END:{name}\n"
+        insert_predictions(results, df["close"].iloc[-1])
         yield "RESULTS:" + json.dumps(results) + "\n"
 
     return StreamingResponse(stream(), media_type="text/plain")
+
+
+@app.get("/prediction-history")
+def prediction_history():
+    resp = (
+        supabase.table("prediction_histories")
+        .select("*")
+        .order("date_of_prediction", desc=True)
+        .execute()
+    )
+    return resp.data or []
 
 @app.get("/stock-100")
 def stock_100():
