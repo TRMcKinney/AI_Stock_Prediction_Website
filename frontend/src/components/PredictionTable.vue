@@ -1,22 +1,27 @@
 <template>
   <div>
-    <h2>
-      Prediction History
-      <span style="margin-left: 0.5rem; font-size: 0.9rem; color: #b35b00;">Work In Progress</span>
-    </h2>
+    <h2>Prediction History</h2>
     <table>
       <thead>
         <tr>
           <th>Date</th>
+          <th>Model</th>
+          <th>% Change</th>
           <th>Predicted Price</th>
           <th>Actual Price</th>
+          <th>Difference</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="entry in fakeData" :key="entry.date">
-          <td>{{ entry.date }}</td>
-          <td>{{ entry.predicted }}</td>
-          <td>{{ entry.actual }}</td>
+        <tr v-for="row in history" :key="row.id">
+          <td>{{ row.date_of_prediction }}</td>
+          <td>{{ row.model_type }}</td>
+          <td>{{ row.prediction?.toFixed(2) }}</td>
+          <td>{{ row.predicted_price?.toFixed(2) }}</td>
+          <td>{{ row.actual_price != null ? row.actual_price.toFixed(2) : '-' }}</td>
+          <td>
+            {{ row.difference != null ? row.difference.toFixed(2) : '-' }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -24,11 +29,20 @@
 </template>
 
 <script setup>
-const fakeData = [
-  { date: '2025-04-01', predicted: 42.1, actual: 41.9 },
-  { date: '2025-03-21', predicted: 40.2, actual: 40.7 },
-  { date: '2025-03-11', predicted: 39.8, actual: 39.4 },
-]
+import { ref, onMounted } from 'vue'
+
+const history = ref([])
+
+async function loadHistory() {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/prediction-history`)
+    history.value = await res.json()
+  } catch (err) {
+    history.value = []
+  }
+}
+
+onMounted(loadHistory)
 </script>
 
 <style scoped>
