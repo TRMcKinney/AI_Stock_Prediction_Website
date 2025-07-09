@@ -3,7 +3,8 @@
     <div class="flex space-x-4">
       <a href="#home" @click.prevent="scrollTo('home')" class="hover:underline">Home</a>
       <a href="#how" @click.prevent="scrollTo('how')" class="hover:underline">How It Works</a>
-      <a href="#predict" @click.prevent="scrollTo('predict')" class="hover:underline">Prediction</a>
+      <a href="#data" @click.prevent="scrollTo('data')" class="hover:underline">Data</a>
+      <a href="#predict" @click.prevent="scrollTo('predict')" class="hover:underline">Predict</a>
       <a href="#why-trust" @click.prevent="scrollTo('trust')" class="hover:underline">Why Trust It?</a>
       <a href="#about" @click.prevent="scrollTo('about')" class="hover:underline">About</a>
     </div>
