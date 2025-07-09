@@ -1,17 +1,17 @@
 <template>
   <div>
-    <h2>Prediction</h2>
-    <table>
-      <thead>
+    <h2 class="text-lg font-semibold mb-2">Prediction</h2>
+    <table class="min-w-full text-sm text-center border">
+      <thead class="bg-gray-100">
         <tr>
-          <th>Model</th>
-          <th>% Change (10d)</th>
+          <th class="py-2 px-3 border">Model</th>
+          <th class="py-2 px-3 border">% Change (10d)</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(m, name) in predictions" :key="name">
-          <td>{{ name }}</td>
-          <td>{{ m.prediction.toFixed(2) }}</td>
+        <tr v-for="(m, name) in predictions" :key="name" class="even:bg-gray-50">
+          <td class="py-2 px-3 border font-medium">{{ name }}</td>
+          <td class="py-2 px-3 border">{{ m.prediction.toFixed(2) }}</td>
         </tr>
       </tbody>
     </table>
@@ -60,14 +60,4 @@ function setPredictionData(data) {
 defineExpose({ updatePrediction, setPredictionData, plotUrl, featureImportanceUrl, predictions })
 </script>
 
-<style scoped>
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  text-align: center;
-}
-</style>
+<style scoped></style>
