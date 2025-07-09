@@ -168,13 +168,20 @@ function scrollToPredict() {
   predictSection.value?.scrollIntoView({ behavior: 'smooth' })
 }
 
+function getSectionEl(sectionRef) {
+  const inst = sectionRef?.value
+  if (!inst) return null
+  return inst.sectionRef?.value ?? inst
+}
+
 function scrollToSection(name) {
   if (name === 'home') {
     window.scrollTo({ top: 0, behavior: 'smooth' })
     return
   }
   const map = { how: howSection, predict: predictSection, trust: trustSection, about: aboutSection }
-  map[name]?.value?.scrollIntoView({ behavior: 'smooth' })
+  const el = getSectionEl(map[name])
+  el?.scrollIntoView({ behavior: 'smooth' })
 }
 </script>
 

@@ -40,6 +40,7 @@ const chartOptions = {
 }
 const showInfo = ref(false)
 const sectionRef = ref(null)
+defineExpose({ sectionRef })
 </script>
 
 <style scoped>
