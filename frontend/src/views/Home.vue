@@ -22,36 +22,22 @@
     </section>
 
     <section id="predict" ref="predictSection" class="py-20 bg-gray-50" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
-      <div class="container mx-auto px-4 space-y-6">
-        <div class="flex flex-col md:flex-row md:space-x-6">
-          <div class="flex-1 space-y-6">
-            <div class="card">
-              <PredictButton />
-            </div>
-            <div class="card">
-              <PredictionDetails ref="predictionDetailsRef" />
-            </div>
-            <div class="card">
-              <PredictionInside :plotUrl="predictionPlotUrl" :featureImportanceUrl="featureImportanceUrl" :metrics="allMetrics" />
-            </div>
-            <div class="card">
-              <PredictionTable />
-            </div>
+      <div class="container mx-auto px-4 space-y-8">
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="space-y-6">
+            <div class="card"><PredictButton /></div>
+            <div class="card"><FetchButton :fetchCount="fetchCount" /></div>
+            <div class="card"><DataChecker /></div>
+            <div class="card"><ConnectionStatus /></div>
           </div>
-          <div class="flex-1 space-y-6 mt-6 md:mt-0">
-            <div class="card">
-              <ConnectionStatus />
-            </div>
-            <div class="card">
-              <StockChart />
-            </div>
-            <div class="card">
-              <FetchButton :fetchCount="fetchCount" />
-            </div>
-            <div class="card">
-              <DataChecker />
-            </div>
+          <div class="md:col-span-2 space-y-6">
+            <div class="card"><StockChart /></div>
+            <div class="card"><PredictionDetails ref="predictionDetailsRef" /></div>
+            <div class="card"><PredictionInside :plotUrl="predictionPlotUrl" :featureImportanceUrl="featureImportanceUrl" :metrics="allMetrics" /></div>
           </div>
+        </div>
+        <div class="card mt-6">
+          <PredictionTable />
         </div>
       </div>
     </section>

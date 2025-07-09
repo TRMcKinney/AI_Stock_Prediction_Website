@@ -1,30 +1,32 @@
 <template>
   <div>
-    <h2>Prediction History</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Model</th>
-          <th>% Change</th>
-          <th>Predicted Price</th>
-          <th>Actual Price</th>
-          <th>Difference</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in history" :key="row.id">
-          <td>{{ row.date_of_prediction }}</td>
-          <td>{{ row.model_type }}</td>
-          <td>{{ row.prediction?.toFixed(2) }}</td>
-          <td>{{ row.predicted_price?.toFixed(2) }}</td>
-          <td>{{ row.actual_price != null ? row.actual_price.toFixed(2) : '-' }}</td>
-          <td>
-            {{ row.difference != null ? row.difference.toFixed(2) : '-' }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <h2 class="text-lg font-semibold mb-2">Prediction History</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm text-center border">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="py-2 px-3 border">Date</th>
+            <th class="py-2 px-3 border">Model</th>
+            <th class="py-2 px-3 border">% Change</th>
+            <th class="py-2 px-3 border">Predicted Price</th>
+            <th class="py-2 px-3 border">Actual Price</th>
+            <th class="py-2 px-3 border">Difference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in history" :key="row.id" class="even:bg-gray-50">
+            <td class="py-2 px-3 border">{{ row.date_of_prediction }}</td>
+            <td class="py-2 px-3 border">{{ row.model_type }}</td>
+            <td class="py-2 px-3 border">{{ row.prediction?.toFixed(2) }}</td>
+            <td class="py-2 px-3 border">{{ row.predicted_price?.toFixed(2) }}</td>
+            <td class="py-2 px-3 border">{{ row.actual_price != null ? row.actual_price.toFixed(2) : '-' }}</td>
+            <td class="py-2 px-3 border">
+              {{ row.difference != null ? row.difference.toFixed(2) : '-' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -44,16 +46,4 @@ async function loadHistory() {
 
 onMounted(loadHistory)
 </script>
-
-<style scoped>
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-}
-th, td {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  text-align: center;
-}
-</style>
+<style scoped></style>

@@ -1,29 +1,34 @@
 <template>
-  <div>
-    <h2>Prediction Details</h2>
-    <div v-if="plotUrl">
-      <h3>Prediction vs Actual</h3>
-      <img :src="plotUrl" alt="Prediction plot" />
+  <div class="space-y-6">
+    <h2 class="text-xl font-semibold">Prediction Details</h2>
+    <div v-if="plotUrl || featureImportanceUrl" class="grid md:grid-cols-2 gap-4">
+      <div v-if="plotUrl" class="bg-gray-50 p-4 rounded-lg shadow">
+        <h3 class="font-medium mb-2">Prediction vs Actual</h3>
+        <img :src="plotUrl" alt="Prediction plot" class="w-full" />
+      </div>
+      <div v-if="featureImportanceUrl" class="bg-gray-50 p-4 rounded-lg shadow">
+        <h3 class="font-medium mb-2">Feature Importance</h3>
+        <img :src="featureImportanceUrl" alt="Feature importance plot" class="w-full" />
+      </div>
     </div>
-    <div v-if="featureImportanceUrl" class="metric">
-      <h3>Feature Importance</h3>
-      <img :src="featureImportanceUrl" alt="Feature importance plot" />
-    </div>
-    <table v-if="Object.keys(metrics).length">
-      <thead>
+    <table
+      v-if="Object.keys(metrics).length"
+      class="w-full text-sm text-center border-collapse mt-4"
+    >
+      <thead class="bg-gray-100">
         <tr>
-          <th>Model</th>
-          <th>R2</th>
-          <th>MAE</th>
-          <th>RMSE</th>
+          <th class="py-2 px-3 border">Model</th>
+          <th class="py-2 px-3 border">R2</th>
+          <th class="py-2 px-3 border">MAE</th>
+          <th class="py-2 px-3 border">RMSE</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(m, name) in metrics" :key="name">
-          <td>{{ name }}</td>
-          <td>{{ m.r2.toFixed(3) }}</td>
-          <td>{{ m.mae.toFixed(3) }}</td>
-          <td>{{ m.rmse.toFixed(3) }}</td>
+        <tr v-for="(m, name) in metrics" :key="name" class="even:bg-gray-50">
+          <td class="py-2 px-3 border font-medium">{{ name }}</td>
+          <td class="py-2 px-3 border">{{ m.r2.toFixed(3) }}</td>
+          <td class="py-2 px-3 border">{{ m.mae.toFixed(3) }}</td>
+          <td class="py-2 px-3 border">{{ m.rmse.toFixed(3) }}</td>
         </tr>
       </tbody>
     </table>
@@ -50,22 +55,6 @@ const props = defineProps({
 
 <style scoped>
 .placeholder {
-  width: 100%;
-  height: 300px;
-  background-color: #f3f3f3;
-  border: 1px dashed #ccc;
-}
-.metric {
-  margin-top: 1rem;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-}
-th, td {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  text-align: center;
+  @apply w-full h-64 bg-gray-100 border border-dashed border-gray-300;
 }
 </style>
