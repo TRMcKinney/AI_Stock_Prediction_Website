@@ -1,5 +1,5 @@
 <template>
-  <section ref="sectionRef" class="py-20 bg-gray-50 dark:bg-gray-800 text-center">
+  <section id="about" ref="sectionRef" class="py-20 bg-gray-50 dark:bg-gray-800 text-center" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
     <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">About the Project</h2>
     <img class="w-32 h-32 rounded-full mx-auto mb-4" :src="photoUrl" alt="Author photo" />
     <p class="mb-4 text-gray-700 dark:text-gray-300">Built by Thomas R McKinney</p>

@@ -3,25 +3,25 @@
     <NavBar :scrollToSection="scrollToSection" />
     <Hero @scrollToPredict="scrollToPredict" @scrollToHow="scrollToHow" />
 
-    <section ref="howSection" class="py-20 bg-white dark:bg-gray-900 text-center">
+    <section id="how" ref="howSection" class="py-20 bg-white dark:bg-gray-900 text-center" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
       <h2 class="text-3xl font-bold mb-10">How It Works</h2>
       <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-8">
-        <div v-motion="{ initial: { opacity: 0, y: 30 }, enter: { opacity: 1, y: 0, transition: { delay: 0.1 } } }" class="p-6 rounded-lg shadow-md bg-gray-50">
+        <div v-motion="{ initial: { opacity: 0, y: 30 }, visibleOnce: { opacity: 1, y: 0, transition: { delay: 0.1 } } }" class="p-6 rounded-lg shadow-md bg-gray-50">
           <div class="text-3xl mb-3">📡</div>
           <p>Our backend fetches the latest Apple stock prices directly from the market.</p>
         </div>
-        <div v-motion="{ initial: { opacity: 0, y: 30 }, enter: { opacity: 1, y: 0, transition: { delay: 0.3 } } }" class="p-6 rounded-lg shadow-md bg-gray-50">
+        <div v-motion="{ initial: { opacity: 0, y: 30 }, visibleOnce: { opacity: 1, y: 0, transition: { delay: 0.3 } } }" class="p-6 rounded-lg shadow-md bg-gray-50">
           <div class="text-3xl mb-3">🧠</div>
           <p>We use a trained deep learning model to predict near-future prices.</p>
         </div>
-        <div v-motion="{ initial: { opacity: 0, y: 30 }, enter: { opacity: 1, y: 0, transition: { delay: 0.5 } } }" class="p-6 rounded-lg shadow-md bg-gray-50">
+        <div v-motion="{ initial: { opacity: 0, y: 30 }, visibleOnce: { opacity: 1, y: 0, transition: { delay: 0.5 } } }" class="p-6 rounded-lg shadow-md bg-gray-50">
           <div class="text-3xl mb-3">📈</div>
           <p>You get an interactive chart with our prediction and trend insights.</p>
         </div>
       </div>
     </section>
 
-    <section ref="predictSection" class="py-20 bg-gray-50 dark:bg-gray-800">
+    <section id="predict" ref="predictSection" class="py-20 bg-gray-50 dark:bg-gray-800" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
       <div class="container mx-auto px-4 space-y-6">
         <div class="flex flex-col md:flex-row md:space-x-6">
           <div class="flex-1 space-y-6">
@@ -56,9 +56,9 @@
       </div>
     </section>
 
-    <WhyTrust ref="trustSection" />
+    <WhyTrust />
 
-    <About ref="aboutSection" />
+    <About />
 
     <Modal v-if="showModal" @close="closePredictionModal">
       <PredictionProgress :models="selectedModels" :abortSignal="predictionAbortController?.signal" @complete="handlePredictionComplete" />
@@ -158,8 +158,6 @@ onMounted(() => {
 // === Smooth scroll helpers ===
 const howSection = ref(null)
 const predictSection = ref(null)
-const trustSection = ref(null)
-const aboutSection = ref(null)
 
 function scrollToHow() {
   howSection.value?.scrollIntoView({ behavior: 'smooth' })
@@ -168,19 +166,13 @@ function scrollToPredict() {
   predictSection.value?.scrollIntoView({ behavior: 'smooth' })
 }
 
-function getSectionEl(sectionRef) {
-  const inst = sectionRef?.value
-  if (!inst) return null
-  return inst.sectionRef?.value ?? inst
-}
-
 function scrollToSection(name) {
   if (name === 'home') {
     window.scrollTo({ top: 0, behavior: 'smooth' })
     return
   }
-  const map = { how: howSection, predict: predictSection, trust: trustSection, about: aboutSection }
-  const el = getSectionEl(map[name])
+  const map = { how: 'how', predict: 'predict', trust: 'why-trust', about: 'about' }
+  const el = document.getElementById(map[name])
   el?.scrollIntoView({ behavior: 'smooth' })
 }
 </script>
