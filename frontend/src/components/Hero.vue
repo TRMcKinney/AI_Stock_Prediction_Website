@@ -1,5 +1,5 @@
 <template>
-  <section ref="vantaRef" class="relative flex flex-col items-center justify-center text-center h-screen overflow-hidden bg-white text-gray-900">
+  <section ref="vantaRef" class="relative flex flex-col items-center justify-center text-center h-screen overflow-hidden bg-black text-white">
     <div class="absolute inset-0 pointer-events-none opacity-20 flex items-center justify-center" :style="appleStyle">
       <div class="text-7xl animate-bounce animated-apple">🍎</div>
     </div>
