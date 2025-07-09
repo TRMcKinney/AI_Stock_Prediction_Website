@@ -1,9 +1,9 @@
 <template>
-  <div id="home" class="font-sans text-gray-900 dark:text-gray-100">
+  <div id="home" class="font-sans text-gray-900">
     <NavBar :scrollToSection="scrollToSection" />
     <Hero @scrollToPredict="scrollToPredict" @scrollToHow="scrollToHow" />
 
-    <section id="how" ref="howSection" class="py-20 bg-white dark:bg-gray-900 text-center" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
+    <section id="how" ref="howSection" class="py-20 bg-white text-center" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
       <h2 class="text-3xl font-bold mb-10">How It Works</h2>
       <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-8">
         <div v-motion="{ initial: { opacity: 0, y: 30 }, visibleOnce: { opacity: 1, y: 0, transition: { delay: 0.1 } } }" class="p-6 rounded-lg shadow-md bg-gray-50">
@@ -21,7 +21,7 @@
       </div>
     </section>
 
-    <section id="predict" ref="predictSection" class="py-20 bg-gray-50 dark:bg-gray-800" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
+    <section id="predict" ref="predictSection" class="py-20 bg-gray-50" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
       <div class="container mx-auto px-4 space-y-6">
         <div class="flex flex-col md:flex-row md:space-x-6">
           <div class="flex-1 space-y-6">

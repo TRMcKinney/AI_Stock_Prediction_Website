@@ -1,18 +1,18 @@
 <template>
-  <section id="why-trust" ref="sectionRef" class="py-20 bg-white dark:bg-gray-900 text-center" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
-    <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">Why Trust It?</h2>
-    <p class="max-w-3xl mx-auto mb-6 text-gray-700 dark:text-gray-300">
+  <section id="why-trust" ref="sectionRef" class="py-20 bg-white text-center" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
+    <h2 class="text-3xl font-bold mb-6 text-gray-900">Why Trust It?</h2>
+    <p class="max-w-3xl mx-auto mb-6 text-gray-700">
       Our predictions are powered by an LSTM neural network trained on years of Apple stock data.
     </p>
     <div class="max-w-xl mx-auto h-64 mb-6">
       <Line :data="chartData" :options="chartOptions" />
     </div>
     <div class="max-w-xl mx-auto">
-      <button @click="showInfo = !showInfo" class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700">
+      <button @click="showInfo = !showInfo" class="px-4 py-2 rounded bg-gray-200">
         {{ showInfo ? 'Hide' : 'View' }} model training info
       </button>
-      <div v-if="showInfo" class="mt-4 text-left p-4 bg-gray-100 dark:bg-gray-800 rounded">
-        <p class="text-sm text-gray-600 dark:text-gray-300">
+      <div v-if="showInfo" class="mt-4 text-left p-4 bg-gray-100 rounded">
+        <p class="text-sm text-gray-600">
           The model uses a multi-layer LSTM with dropout and is trained on daily prices from the past decade. Metrics such as MAE and RMSE are tracked during training.
         </p>
       </div>
