@@ -3,8 +3,21 @@
     <Hero @scrollToPredict="scrollToPredict" @scrollToHow="scrollToHow" />
 
     <section ref="howSection" class="py-20 bg-white text-center">
-      <h2 class="text-3xl font-bold mb-6">How It Works</h2>
-      <p class="max-w-2xl mx-auto text-lg">Animated walkthrough placeholder showing live API data, LSTM model and interactive chart.</p>
+      <h2 class="text-3xl font-bold mb-10">How It Works</h2>
+      <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-8">
+        <div v-motion="{ initial: { opacity: 0, y: 30 }, enter: { opacity: 1, y: 0, transition: { delay: 0.1 } } }" class="p-6 rounded-lg shadow-md bg-gray-50">
+          <div class="text-3xl mb-3">📡</div>
+          <p>Our backend fetches the latest Apple stock prices directly from the market.</p>
+        </div>
+        <div v-motion="{ initial: { opacity: 0, y: 30 }, enter: { opacity: 1, y: 0, transition: { delay: 0.3 } } }" class="p-6 rounded-lg shadow-md bg-gray-50">
+          <div class="text-3xl mb-3">🧠</div>
+          <p>We use a trained deep learning model to predict near-future prices.</p>
+        </div>
+        <div v-motion="{ initial: { opacity: 0, y: 30 }, enter: { opacity: 1, y: 0, transition: { delay: 0.5 } } }" class="p-6 rounded-lg shadow-md bg-gray-50">
+          <div class="text-3xl mb-3">📈</div>
+          <p>You get an interactive chart with our prediction and trend insights.</p>
+        </div>
+      </div>
     </section>
 
     <section ref="predictSection" class="py-20 bg-gray-50">
