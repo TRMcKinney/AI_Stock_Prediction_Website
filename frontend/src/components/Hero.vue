@@ -1,5 +1,5 @@
 <template>
-  <section class="relative flex flex-col items-center justify-center text-center h-screen overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white">
+  <section ref="vantaRef" class="relative flex flex-col items-center justify-center text-center h-screen overflow-hidden bg-black text-white">
     <div class="absolute inset-0 pointer-events-none opacity-20 flex items-center justify-center" :style="appleStyle">
       <div class="text-7xl animate-bounce animated-apple">🍎</div>
     </div>
@@ -15,6 +15,9 @@
 // Emit events to scroll to sections
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 
+const vantaRef = ref(null)
+let vantaEffect = null
+
 const scrollY = ref(0)
 
 function onScroll() {
@@ -23,10 +26,24 @@ function onScroll() {
 
 onMounted(() => {
   window.addEventListener('scroll', onScroll)
+  if (window.VANTA?.NET) {
+    vantaEffect = window.VANTA.NET({
+      el: vantaRef.value,
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      color: 0xffffff,
+      backgroundColor: 0x000000,
+      points: 12.0,
+      maxDistance: 20.0,
+      spacing: 15.0
+    })
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
+  if (vantaEffect) vantaEffect.destroy()
 })
 
 const appleStyle = computed(() => ({
