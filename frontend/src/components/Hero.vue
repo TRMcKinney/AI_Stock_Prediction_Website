@@ -32,8 +32,8 @@ onMounted(() => {
       mouseControls: true,
       touchControls: true,
       gyroControls: false,
-      color: 0xffffff,
-      backgroundColor: 0x000000,
+      color: 0xbbbbbb,
+      backgroundColor: 0xffffff,
       points: 12.0,
       maxDistance: 20.0,
       spacing: 15.0
@@ -54,7 +54,7 @@ const appleStyle = computed(() => ({
 <style scoped>
 .typewriter {
   overflow: hidden;
-  border-right: 0.15em solid #fff;
+  border-right: 0.15em solid #333;
   white-space: nowrap;
   animation: typing 3s steps(40, end), blink 0.75s step-end infinite;
 }
