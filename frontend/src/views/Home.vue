@@ -1,8 +1,9 @@
 <template>
-  <div id="home" class="font-sans text-gray-900">
+  <div id="home" class="font-sans text-gray-900 dark:text-gray-100">
+    <NavBar :scrollToSection="scrollToSection" />
     <Hero @scrollToPredict="scrollToPredict" @scrollToHow="scrollToHow" />
 
-    <section ref="howSection" class="py-20 bg-white text-center">
+    <section ref="howSection" class="py-20 bg-white dark:bg-gray-900 text-center">
       <h2 class="text-3xl font-bold mb-10">How It Works</h2>
       <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-8">
         <div v-motion="{ initial: { opacity: 0, y: 30 }, enter: { opacity: 1, y: 0, transition: { delay: 0.1 } } }" class="p-6 rounded-lg shadow-md bg-gray-50">
@@ -20,7 +21,7 @@
       </div>
     </section>
 
-    <section ref="predictSection" class="py-20 bg-gray-50">
+    <section ref="predictSection" class="py-20 bg-gray-50 dark:bg-gray-800">
       <div class="container mx-auto px-4 space-y-6">
         <div class="flex flex-col md:flex-row md:space-x-6">
           <div class="flex-1 space-y-6">
@@ -55,6 +56,10 @@
       </div>
     </section>
 
+    <WhyTrust ref="trustSection" />
+
+    <About ref="aboutSection" />
+
     <Modal v-if="showModal" @close="closePredictionModal">
       <PredictionProgress :models="selectedModels" :abortSignal="predictionAbortController?.signal" @complete="handlePredictionComplete" />
     </Modal>
@@ -65,9 +70,11 @@
 
 <script setup>
 import { ref, provide, watch, onMounted } from 'vue'
-import { useScroll } from '@vueuse/core'
 
 import Hero from '../components/Hero.vue'
+import NavBar from '../components/NavBar.vue'
+import WhyTrust from '../components/WhyTrust.vue'
+import About from '../components/About.vue'
 import PredictButton from '../components/PredictButton.vue'
 import PredictionTable from '../components/PredictionTable.vue'
 import StockChart from '../components/StockChart.vue'
@@ -151,13 +158,23 @@ onMounted(() => {
 // === Smooth scroll helpers ===
 const howSection = ref(null)
 const predictSection = ref(null)
-const { y } = useScroll(window)
+const trustSection = ref(null)
+const aboutSection = ref(null)
 
 function scrollToHow() {
   howSection.value?.scrollIntoView({ behavior: 'smooth' })
 }
 function scrollToPredict() {
   predictSection.value?.scrollIntoView({ behavior: 'smooth' })
+}
+
+function scrollToSection(name) {
+  if (name === 'home') {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    return
+  }
+  const map = { how: howSection, predict: predictSection, trust: trustSection, about: aboutSection }
+  map[name]?.value?.scrollIntoView({ behavior: 'smooth' })
 }
 </script>
 
