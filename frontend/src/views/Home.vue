@@ -41,11 +41,14 @@
         <div class="card"><PredictButton /></div>
         <div class="card"><PredictionDetails ref="predictionDetailsRef" /></div>
         <div class="card"><PredictionInside :plotUrl="predictionPlotUrl" :featureImportanceUrl="featureImportanceUrl" :metrics="allMetrics" /></div>
-        <div class="card"><PredictionTable /></div>
       </div>
     </section>
 
-    <WhyTrust />
+    <section id="history" ref="historySection" class="py-20 bg-white" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
+      <div class="container mx-auto px-4 space-y-6">
+        <div class="card"><PredictionTable /></div>
+      </div>
+    </section>
 
     <About />
 
@@ -62,7 +65,6 @@ import { ref, provide, watch, onMounted } from 'vue'
 
 import Hero from '../components/Hero.vue'
 import NavBar from '../components/NavBar.vue'
-import WhyTrust from '../components/WhyTrust.vue'
 import About from '../components/About.vue'
 import PredictButton from '../components/PredictButton.vue'
 import PredictionTable from '../components/PredictionTable.vue'
@@ -148,6 +150,7 @@ onMounted(() => {
 const howSection = ref(null)
 const dataSection = ref(null)
 const predictSection = ref(null)
+const historySection = ref(null)
 
 function scrollToHow() {
   howSection.value?.scrollIntoView({ behavior: 'smooth' })
@@ -164,7 +167,7 @@ function scrollToSection(name) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
     return
   }
-  const map = { how: 'how', data: 'data', predict: 'predict', trust: 'why-trust', about: 'about' }
+  const map = { how: 'how', data: 'data', predict: 'predict', history: 'history', about: 'about' }
   const el = document.getElementById(map[name])
   el?.scrollIntoView({ behavior: 'smooth' })
 }
