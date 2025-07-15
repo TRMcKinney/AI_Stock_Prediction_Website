@@ -19,6 +19,24 @@ def _mask_key(text: str) -> str:
     """Mask occurrences of the API key in the provided text."""
     return text.replace(ALPHA_VANTAGE_API_KEY, "[REDACTED]")
 
+
+def test_alpha_vantage() -> bool:
+    """Attempt a small request to Alpha Vantage and return success status."""
+    url = "https://www.alphavantage.co/query"
+    params = {
+        "function": "GLOBAL_QUOTE",
+        "symbol": "IBM",
+        "apikey": ALPHA_VANTAGE_API_KEY,
+    }
+    try:
+        r = requests.get(url, params=params, timeout=10)
+        data = r.json()
+    except Exception as e:
+        print("Test request failed:", e)
+        return False
+
+    return "Global Quote" in data
+
 def get_daily_stock_data(symbol):
     print("API key acquired.")
     url = "https://www.alphavantage.co/query"
@@ -82,6 +100,12 @@ def fetch_and_upload():
     if fetch_count >= 25:
         print("API rate limit reached, skipping.")
         return 0
+
+    print("Testing Alpha Vantage connection...")
+    if test_alpha_vantage():
+        print("Successfully retrieved test data from Alpha Vantage.")
+    else:
+        print("Failed to retrieve test data from Alpha Vantage.")
 
     print("Proceeding with fetch...")
     data = get_daily_stock_data(SYMBOL)
