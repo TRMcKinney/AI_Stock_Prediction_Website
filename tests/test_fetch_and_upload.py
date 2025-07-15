@@ -56,6 +56,7 @@ class DummySupabase:
 def _patch_common(mocker, supabase, date):
     mocker.patch.object(fu, "supabase", supabase)
     mocker.patch.object(fu, "get_daily_stock_data", return_value=[])
+    mocker.patch.object(fu, "test_alpha_vantage", return_value=True)
     dt_mock = mocker.Mock(wraps=datetime)
     dt_mock.today.return_value = date
     mocker.patch.object(fu, "datetime", dt_mock)
