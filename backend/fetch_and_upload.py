@@ -15,23 +15,35 @@ TABLE_NAME = "stock_prices"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 SYMBOL = "AAPL"
 
+def _mask_key(text: str) -> str:
+    """Mask occurrences of the API key in the provided text."""
+    return text.replace(ALPHA_VANTAGE_API_KEY, "[REDACTED]")
+
 def get_daily_stock_data(symbol):
+    print("API key acquired.")
     url = "https://www.alphavantage.co/query"
     params = {
         "function": "TIME_SERIES_DAILY",
         "symbol": symbol,
         "outputsize": "compact",
-        "apikey": ALPHA_VANTAGE_API_KEY
+        "apikey": ALPHA_VANTAGE_API_KEY,
     }
 
-    r = requests.get(url, params=params)
-    data = r.json()
-
-    if "Time Series (Daily)" not in data:
-        print("Failed to fetch stock data:", data)
+    print("Connecting to Alpha Vantage...")
+    try:
+        r = requests.get(url, params=params, timeout=10)
+        print("Retrieving data...")
+        data = r.json()
+    except Exception as e:
+        print("Failed request:", e)
         return []
 
-    return [
+    if "Time Series (Daily)" not in data:
+        sanitized = {k: _mask_key(str(v)) for k, v in data.items()}
+        print("Failed to fetch stock data:", sanitized)
+        return []
+
+    records = [
         {
             "timestamp": date_str,
             "open": float(values["1. open"]),
@@ -42,6 +54,9 @@ def get_daily_stock_data(symbol):
         }
         for date_str, values in data["Time Series (Daily)"].items()
     ]
+
+    print(f"Retrieved {len(records)} records.")
+    return records
 
 def upload_to_supabase(records):
     print("Uploading to Supabase...")
@@ -62,17 +77,20 @@ def fetch_and_upload():
     today = datetime.today().strftime('%Y-%m-%d')
     count_res = supabase.table("fetch_metadata").select("value").eq("date", today).maybe_single().execute()
     fetch_count = int(count_res.data["value"]) if count_res and count_res.data else 0
+    print(f"Fetch count for {today}: {fetch_count}")
 
     if fetch_count >= 25:
         print("API rate limit reached, skipping.")
         return 0
 
+    print("Proceeding with fetch...")
     data = get_daily_stock_data(SYMBOL)
     if not data:
         print("No data fetched.")
         return 0
 
     uploaded = upload_to_supabase(data)
+    print(f"Uploaded {uploaded} new rows.")
 
     # Update or insert today's fetch count
     new_count = fetch_count + 1
