@@ -87,6 +87,13 @@ def fetch_and_upload():
     data = get_daily_stock_data(SYMBOL)
     if not data:
         print("No data fetched.")
+        new_count = fetch_count + 1
+        if count_res and count_res.data:
+            print(f"Updating fetch count to {new_count} for {today}")
+            supabase.table("fetch_metadata").update({"value": str(new_count)}).eq("date", today).execute()
+        else:
+            print(f"First fetch today — inserting row with count {new_count} for {today}")
+            supabase.table("fetch_metadata").insert({"date": today, "value": str(new_count)}).execute()
         return 0
 
     uploaded = upload_to_supabase(data)
