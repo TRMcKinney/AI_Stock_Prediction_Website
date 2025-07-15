@@ -36,11 +36,6 @@ const emit = defineEmits(['close'])
       logs.value.push("\nError during fetch:\n" + err.message)
     }
   
-    // Optional: auto-close after delay
-    setTimeout(() => {
-      // emit close only if modal is still visible
-      if (logs.value.length > 0) emit('close')
-    }, 3000)
   })
   </script>
   
