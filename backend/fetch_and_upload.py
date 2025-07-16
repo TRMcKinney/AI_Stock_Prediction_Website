@@ -3,7 +3,6 @@ import requests
 from datetime import datetime
 from supabase import create_client
 from dotenv import load_dotenv
-from prediction_history import update_with_actual
 
 load_dotenv()
 
@@ -87,8 +86,6 @@ def upload_to_supabase(records):
             print(f"   Inserted: {row['timestamp']}")
         else:
             print(f"   Skipped duplicate: {row['timestamp']}")
-        # Update any prediction history entries expecting this date
-        update_with_actual(row["timestamp"], row["close"])
     return inserted_count
 
 def fetch_and_upload():
