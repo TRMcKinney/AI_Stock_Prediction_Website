@@ -53,3 +53,35 @@ def update_with_actual(date: str, close_price: float) -> None:
         supabase.table(TABLE_NAME).update(
             {"actual_price": close_price, "difference": diff}
         ).eq("id", row["id"]).execute()
+
+
+def refresh_missing_actuals() -> int:
+    """Populate actual price/difference for past predictions."""
+    today = datetime.utcnow().date().isoformat()
+    resp = (
+        supabase.table(TABLE_NAME)
+        .select("id,predicted_price,10_days_later_date")
+        .is_("actual_price", None)
+        .lte("10_days_later_date", today)
+        .execute()
+    )
+
+    updated = 0
+    for row in resp.data or []:
+        date = row["10_days_later_date"]
+        price_resp = (
+            supabase.table("stock_prices")
+            .select("close")
+            .eq("timestamp", date)
+            .maybe_single()
+            .execute()
+        )
+        if price_resp.data:
+            close_price = float(price_resp.data["close"])
+            diff = close_price - float(row["predicted_price"])
+            supabase.table(TABLE_NAME).update(
+                {"actual_price": close_price, "difference": diff}
+            ).eq("id", row["id"]).execute()
+            updated += 1
+
+    return updated

@@ -1,6 +1,9 @@
 <template>
   <div>
-    <h2 class="text-lg font-semibold mb-2">Prediction History</h2>
+    <div class="flex items-center mb-2">
+      <h2 class="text-lg font-semibold mr-4">Prediction History</h2>
+      <button class="refresh-btn" @click="refreshHistory">Update History</button>
+    </div>
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm text-center border">
         <thead class="bg-gray-100">
@@ -33,6 +36,15 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
+async function refreshHistory() {
+  try {
+    await fetch(`${import.meta.env.VITE_API_BASE_URL}/refresh-prediction-history`, { method: 'POST' })
+    await loadHistory()
+  } catch (err) {
+    console.error('Failed to refresh prediction history', err)
+  }
+}
+
 const history = ref([])
 
 async function loadHistory() {
@@ -46,4 +58,15 @@ async function loadHistory() {
 
 onMounted(loadHistory)
 </script>
-<style scoped></style>
+<style scoped>
+.refresh-btn {
+  padding: 0.4rem 0.8rem;
+  background-color: #2563eb;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+.refresh-btn:hover {
+  background-color: #1e4db7;
+}
+</style>

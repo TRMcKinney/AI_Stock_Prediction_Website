@@ -16,7 +16,7 @@ import grid_search_model
 from fetch_and_upload import fetch_and_upload
 from fastapi.responses import StreamingResponse
 import json
-from prediction_history import insert_predictions
+from prediction_history import insert_predictions, refresh_missing_actuals
 
 # Load env vars
 load_dotenv()
@@ -109,6 +109,13 @@ def prediction_history():
         .execute()
     )
     return resp.data or []
+
+
+@app.post("/refresh-prediction-history")
+def refresh_prediction_history():
+    """Update prediction records with actual prices."""
+    updated = refresh_missing_actuals()
+    return {"updated": updated}
 
 @app.get("/stock-100")
 def stock_100():
