@@ -2,8 +2,22 @@
   <div>
     <div class="flex items-center mb-2">
       <h2 class="text-lg font-semibold mr-4">Prediction History</h2>
-      <button class="refresh-btn" @click="refreshHistory">Update History</button>
+      <button
+        class="refresh-btn"
+        :disabled="isRefreshing"
+        @click="refreshHistory"
+      >
+        <span v-if="isRefreshing">Updating...</span>
+        <span v-else>Update History</span>
+      </button>
     </div>
+    <p
+      v-if="statusMessage"
+      class="mb-3 text-sm"
+      :class="statusType === 'error' ? 'text-red-600' : 'text-green-600'"
+    >
+      {{ statusMessage }}
+    </p>
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm text-center border">
         <thead class="bg-gray-100">
@@ -36,27 +50,75 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-async function refreshHistory() {
-  try {
-    await fetch(`${import.meta.env.VITE_API_BASE_URL}/refresh-prediction-history`, { method: 'POST' })
-    await loadHistory()
-  } catch (err) {
-    console.error('Failed to refresh prediction history', err)
-  }
-}
-
 const history = ref([])
+const isRefreshing = ref(false)
+const statusMessage = ref('')
+const statusType = ref('success')
 
-async function loadHistory() {
+async function loadHistory({ showErrors = false } = {}) {
   try {
     const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/prediction-history`)
+    if (!res.ok) {
+      throw new Error(`Failed to load prediction history: ${res.status}`)
+    }
     history.value = await res.json()
   } catch (err) {
     history.value = []
+    console.error('Failed to load prediction history', err)
+    if (showErrors) {
+      statusMessage.value = 'Unable to load prediction history. Please try again later.'
+      statusType.value = 'error'
+    }
+    throw err
   }
 }
 
-onMounted(loadHistory)
+async function refreshHistory() {
+  if (isRefreshing.value) return
+
+  statusMessage.value = ''
+  isRefreshing.value = true
+  statusType.value = 'success'
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/refresh-prediction-history`, {
+      method: 'POST',
+    })
+
+    if (!res.ok) {
+      throw new Error(`Failed to refresh prediction history: ${res.status}`)
+    }
+
+    let updatedCount = null
+    try {
+      const data = await res.json()
+      updatedCount = typeof data?.updated === 'number' ? data.updated : null
+    } catch (err) {
+      updatedCount = null
+    }
+
+    await loadHistory()
+
+    if (updatedCount === null) {
+      statusMessage.value = 'Prediction history refreshed.'
+    } else if (updatedCount === 0) {
+      statusMessage.value = 'Prediction history is already up to date.'
+    } else {
+      statusMessage.value = `Updated ${updatedCount} record${updatedCount === 1 ? '' : 's'} with actual prices.`
+    }
+    statusType.value = 'success'
+  } catch (err) {
+    console.error('Failed to refresh prediction history', err)
+    statusMessage.value = 'Failed to refresh prediction history. Please try again.'
+    statusType.value = 'error'
+  } finally {
+    isRefreshing.value = false
+  }
+}
+
+onMounted(() => {
+  loadHistory({ showErrors: true }).catch(() => {})
+})
 </script>
 <style scoped>
 .refresh-btn {
@@ -69,4 +131,9 @@ onMounted(loadHistory)
 .refresh-btn:hover {
   background-color: #1e4db7;
 }
+.refresh-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 </style>
+
