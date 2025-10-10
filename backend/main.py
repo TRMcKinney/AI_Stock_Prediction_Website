@@ -46,11 +46,37 @@ _stock_cache = {"df": None, "expires": datetime.min}
 
 
 def _fetch_stock_prices_from_supabase():
-    response = supabase.table("stock_prices").select("*").order("timestamp").execute()
-    df = pd.DataFrame(response.data)
-    if df.empty:
+    """Fetch the full stock history from Supabase, handling pagination limits."""
+
+    page_size = 1000
+    start = 0
+    frames = []
+
+    while True:
+        end = start + page_size - 1
+        response = (
+            supabase.table("stock_prices")
+            .select("*")
+            .order("timestamp")
+            .range(start, end)
+            .execute()
+        )
+
+        rows = response.data or []
+        if not rows:
+            break
+
+        frames.append(pd.DataFrame(rows))
+
+        if len(rows) < page_size:
+            break
+
+        start += page_size
+
+    if not frames:
         raise ValueError("No data available")
-    return df
+
+    return pd.concat(frames, ignore_index=True)
 
 
 def get_stock_dataframe(force_refresh: bool = False) -> pd.DataFrame:
