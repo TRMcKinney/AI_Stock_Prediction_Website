@@ -87,19 +87,34 @@ onMounted(async () => {
   startProgress()
   try {
     const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/stock-100`)
-    const data = res.data
+    const payload = Array.isArray(res.data) ? res.data : []
+
+    const sanitized = payload
+      .filter((d) => d && d.date && d.close !== null && d.close !== undefined)
+      .map((d) => ({
+        date: new Date(d.date),
+        close: Number.parseFloat(d.close)
+      }))
+      .filter((d) => !Number.isNaN(d.close) && !Number.isNaN(d.date.valueOf()))
+
+    if (!sanitized.length) {
+      throw new Error('No valid chart data returned.')
+    }
+
+    const latestHundred = sanitized
+      .sort((a, b) => a.date - b.date)
+      .slice(-100)
 
     chartData.value = {
-      labels: data.map(d => {
-        const date = new Date(d.date)
-        return `${date.getDate().toString().padStart(2, '0')}/${
-          (date.getMonth() + 1).toString().padStart(2, '0')
-        }/${date.getFullYear()}`
-      }),
+      labels: latestHundred.map((d) =>
+        `${d.date.getDate().toString().padStart(2, '0')}/${
+          (d.date.getMonth() + 1).toString().padStart(2, '0')
+        }/${d.date.getFullYear()}`
+      ),
       datasets: [
         {
           label: 'Close ($)',
-          data: data.map(d => d.close),
+          data: latestHundred.map((d) => d.close),
           borderColor: '#410093',
           fill: false,
           tension: 0.2
