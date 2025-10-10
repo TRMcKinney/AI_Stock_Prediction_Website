@@ -13,6 +13,12 @@
         </span>
       </li>
     </ul>
+    <div class="overall-progress">
+      <div class="progress-bar">
+        <div class="progress-fill" :style="{ width: `${progressPercent}%` }"></div>
+      </div>
+      <p class="progress-text">Overall progress: {{ progressPercent }}%</p>
+    </div>
     <div v-if="!allDone && !error" class="loader"></div>
     <p v-if="error" class="error">{{ error }}</p>
   </div>
@@ -53,6 +59,11 @@ const models = ref(
 const results = ref(null)
 const error = ref('')
 const allDone = computed(() => models.value.every((m) => m.status === 'done'))
+const completedCount = computed(() => models.value.filter((m) => m.status === 'done').length)
+const progressPercent = computed(() => {
+  if (models.value.length === 0) return 0
+  return Math.round((completedCount.value / models.value.length) * 100)
+})
 
 function processLine(line) {
   if (line.startsWith('START:')) {
@@ -152,5 +163,25 @@ li {
 .error {
   color: red;
   margin-top: 0.5rem;
+}
+.overall-progress {
+  margin-top: 1rem;
+}
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #e0e0e0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #410093, #7e3ff2);
+  transition: width 0.2s ease;
+}
+.progress-text {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 0.35rem;
 }
 </style>

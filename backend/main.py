@@ -6,14 +6,14 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
+from threading import Lock
 import subprocess
 import pandas as pd
 import baseline_model
 import cross_validation_model
 import persist_model
 import grid_search_model
-from fetch_and_upload import fetch_and_upload
 from fastapi.responses import StreamingResponse
 import json
 from prediction_history import insert_predictions, refresh_missing_actuals
@@ -36,6 +36,40 @@ STOCK_SYMBOL = "AAPL"
 
 app = FastAPI()
 
+
+# ---------------------------------------------------------------------------
+# Simple in-memory caching for expensive Supabase queries
+# ---------------------------------------------------------------------------
+CACHE_TTL_SECONDS = int(os.getenv("STOCK_CACHE_TTL_SECONDS", "300"))
+_stock_cache_lock = Lock()
+_stock_cache = {"df": None, "expires": datetime.min}
+
+
+def _fetch_stock_prices_from_supabase():
+    response = supabase.table("stock_prices").select("*").order("timestamp").execute()
+    df = pd.DataFrame(response.data)
+    if df.empty:
+        raise ValueError("No data available")
+    return df
+
+
+def get_stock_dataframe(force_refresh: bool = False) -> pd.DataFrame:
+    """Return cached stock prices as a DataFrame."""
+
+    now = datetime.utcnow()
+    if not force_refresh:
+        with _stock_cache_lock:
+            if _stock_cache["df"] is not None and now < _stock_cache["expires"]:
+                return _stock_cache["df"].copy()
+
+    df = _fetch_stock_prices_from_supabase()
+
+    with _stock_cache_lock:
+        _stock_cache["df"] = df
+        _stock_cache["expires"] = now + timedelta(seconds=CACHE_TTL_SECONDS)
+
+    return df.copy()
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
@@ -51,10 +85,10 @@ def root():
 
 @app.get("/predict")
 def predict(models: str = Query("")):
-    response = supabase.table("stock_prices").select("*").order("timestamp").execute()
-    df = pd.DataFrame(response.data)
-    if df.empty:
-        return {"error": "No data available"}
+    try:
+        df = get_stock_dataframe()
+    except ValueError as exc:
+        return {"error": str(exc)}
     available = {
         "baseline": baseline_model.train_and_predict,
         "cross_validation": cross_validation_model.train_and_predict,
@@ -72,9 +106,9 @@ def predict(models: str = Query("")):
 @app.get("/predict-stream")
 def predict_stream(models: str = Query("")):
     def stream():
-        response = supabase.table("stock_prices").select("*").order("timestamp").execute()
-        df = pd.DataFrame(response.data)
-        if df.empty:
+        try:
+            df = get_stock_dataframe()
+        except ValueError:
             yield "ERROR:No data available\n"
             return
         available = {
@@ -119,21 +153,29 @@ def refresh_prediction_history():
 
 @app.get("/stock-100")
 def stock_100():
-    response = supabase.table("stock_prices").select("*").order("timestamp", desc=True).limit(100).execute()
-    data = response.data or []
-    sorted_data = sorted(data, key=lambda x: x["timestamp"])
-    return [{"date": row["timestamp"], "close": round(row["close"], 2)} for row in sorted_data]
+    try:
+        df = get_stock_dataframe()
+    except ValueError:
+        return []
+
+    latest = df.tail(100).copy()
+    latest.sort_values("timestamp", inplace=True)
+    return [
+        {"date": row["timestamp"], "close": round(row["close"], 2)}
+        for row in latest.to_dict(orient="records")
+    ]
 
 @app.get("/stock-stats")
 def stock_stats():
-    count_res = supabase.table("stock_prices").select("id", count="exact").execute()
-    row_count = count_res.count or 0
-    min_date_res = supabase.table("stock_prices").select("timestamp").order("timestamp").limit(1).execute()
-    max_date_res = supabase.table("stock_prices").select("timestamp").order("timestamp", desc=True).limit(1).execute()
+    try:
+        df = get_stock_dataframe()
+    except ValueError:
+        return {"count": 0, "min_date": None, "max_date": None}
+
     return {
-        "count": row_count,
-        "min_date": min_date_res.data[0]["timestamp"] if min_date_res.data else None,
-        "max_date": max_date_res.data[0]["timestamp"] if max_date_res.data else None
+        "count": int(df.shape[0]),
+        "min_date": df["timestamp"].iloc[0] if not df.empty else None,
+        "max_date": df["timestamp"].iloc[-1] if not df.empty else None,
     }
 
 @app.get("/fetch-count")
@@ -176,6 +218,11 @@ def fetch_latest_stream():
             yield line
 
         process.wait()
+        # Refresh cache with newly ingested data
+        try:
+            get_stock_dataframe(force_refresh=True)
+        except ValueError:
+            pass
         yield f"\n Done. Exit code: {process.returncode}\n"
 
     return StreamingResponse(stream_logs(), media_type="text/plain")
