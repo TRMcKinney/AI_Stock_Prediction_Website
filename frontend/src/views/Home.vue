@@ -68,15 +68,11 @@ import NavBar from '../components/NavBar.vue'
 import About from '../components/About.vue'
 import PredictButton from '../components/PredictButton.vue'
 import PredictionTable from '../components/PredictionTable.vue'
-import StockChart from '../components/StockChart.vue'
-import FetchButton from '../components/FetchButton.vue'
-import DataChecker from '../components/DataChecker.vue'
+import StockDataDashboard from '../components/StockDataDashboard.vue'
 import PredictionDetails from '../components/PredictionDetails.vue'
 import PredictionInside from '../components/PredictionInside.vue'
 import PredictionProgress from '../components/PredictionProgress.vue'
 import Modal from '../components/Modal.vue'
-import ConnectionStatus from '../components/ConnectionStatus.vue'
-import FetchLogsModal from '../components/FetchLogsModal.vue'
 
 // === PREDICTION MODAL ===
 const showModal = ref(false)
