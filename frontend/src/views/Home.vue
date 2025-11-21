@@ -22,17 +22,8 @@
     </section>
 
     <section id="data" ref="dataSection" class="py-20 bg-gray-50" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
-      <div class="container mx-auto px-4 space-y-8">
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="space-y-6">
-            <div class="card"><FetchButton :fetchCount="fetchCount" /></div>
-            <div class="card"><DataChecker /></div>
-            <div class="card"><ConnectionStatus /></div>
-          </div>
-          <div class="md:col-span-2">
-            <div class="card h-full"><StockChart /></div>
-          </div>
-        </div>
+      <div class="container mx-auto px-4">
+        <StockDataDashboard />
       </div>
     </section>
 
