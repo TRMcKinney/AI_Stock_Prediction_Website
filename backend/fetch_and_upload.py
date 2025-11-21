@@ -21,7 +21,7 @@ def fetch_and_upload():
     # yfinance handles the "API" part automatically without a key
     try:
         ticker = yf.Ticker(SYMBOL)
-        hist = ticker.history(period="1mo") 
+        hist = ticker.history(period="1y") 
     except Exception as e:
         print(f"Error fetching data from Yahoo: {e}")
         return 0
