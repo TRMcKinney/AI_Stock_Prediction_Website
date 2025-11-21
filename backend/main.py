@@ -1,5 +1,5 @@
 import os
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # Suppress TensorFlow warnings
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 import sys
 from fastapi import FastAPI, Query
@@ -21,14 +21,13 @@ from prediction_history import insert_predictions, refresh_missing_actuals
 # Load env vars
 load_dotenv()
 
-ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+# ALPHA_VANTAGE_API_KEY is no longer strictly needed for the fetch, 
+# but we keep it if other parts use it or for safety.
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("Supabase credentials are missing.")
-if not ALPHA_VANTAGE_API_KEY:
-    raise RuntimeError("Alpha Vantage API key is missing.")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -36,22 +35,15 @@ STOCK_SYMBOL = "AAPL"
 
 app = FastAPI()
 
-
-# ---------------------------------------------------------------------------
-# Simple in-memory caching for expensive Supabase queries
-# ---------------------------------------------------------------------------
+# --- Caching Logic (Unchanged) ---
 CACHE_TTL_SECONDS = int(os.getenv("STOCK_CACHE_TTL_SECONDS", "300"))
 _stock_cache_lock = Lock()
 _stock_cache = {"df": None, "expires": datetime.min}
 
-
 def _fetch_stock_prices_from_supabase():
-    """Fetch the full stock history from Supabase, handling pagination limits."""
-
     page_size = 1000
     start = 0
     frames = []
-
     while True:
         end = start + page_size - 1
         response = (
@@ -61,27 +53,19 @@ def _fetch_stock_prices_from_supabase():
             .range(start, end)
             .execute()
         )
-
         rows = response.data or []
         if not rows:
             break
-
         frames.append(pd.DataFrame(rows))
-
         if len(rows) < page_size:
             break
-
         start += page_size
 
     if not frames:
         raise ValueError("No data available")
-
     return pd.concat(frames, ignore_index=True)
 
-
 def get_stock_dataframe(force_refresh: bool = False) -> pd.DataFrame:
-    """Return cached stock prices as a DataFrame."""
-
     now = datetime.utcnow()
     if not force_refresh:
         with _stock_cache_lock:
@@ -96,7 +80,6 @@ def get_stock_dataframe(force_refresh: bool = False) -> pd.DataFrame:
 
     return df.copy()
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "https://ai-stock-predictorr.netlify.app"],
@@ -107,7 +90,7 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message": f"FastAPI + Alpha Vantage backend for {STOCK_SYMBOL}"}
+    return {"message": f"FastAPI + yfinance backend for {STOCK_SYMBOL}"}
 
 @app.get("/predict")
 def predict(models: str = Query("")):
@@ -159,7 +142,6 @@ def predict_stream(models: str = Query("")):
 
     return StreamingResponse(stream(), media_type="text/plain")
 
-
 @app.get("/prediction-history")
 def prediction_history():
     resp = (
@@ -170,10 +152,8 @@ def prediction_history():
     )
     return resp.data or []
 
-
 @app.post("/refresh-prediction-history")
 def refresh_prediction_history():
-    """Update prediction records with actual prices."""
     updated = refresh_missing_actuals()
     return {"updated": updated}
 
@@ -183,7 +163,6 @@ def stock_100():
         df = get_stock_dataframe()
     except ValueError:
         return []
-
     latest = df.tail(100).copy()
     latest.sort_values("timestamp", inplace=True)
     return [
@@ -204,34 +183,12 @@ def stock_stats():
         "max_date": df["timestamp"].iloc[-1] if not df.empty else None,
     }
 
-@app.get("/fetch-count")
-def fetch_count():
-    today = datetime.today().strftime('%Y-%m-%d')
-    response = supabase.table("fetch_metadata").select("value").eq("date", today).maybe_single().execute()
-    count = int(response.data["value"]) if response and response.data else 0
-    return {"count": count}
-
-@app.get("/last-fetch-date")
-def get_last_fetch_date():
-    response = supabase.table("fetch_metadata").select("date").order("date", desc=True).limit(1).maybe_single().execute()
-    last_date = response.data["date"] if response and response.data else None
-    return {"last_fetch": last_date}
-
+# === UPDATED FETCH ENDPOINT ===
 @app.post("/fetch-latest-stream")
 def fetch_latest_stream():
     def stream_logs():
-        today = datetime.today().strftime('%Y-%m-%d')
-
-        # Get current count from Supabase
-        response = supabase.table("fetch_metadata").select("value").eq("date", today).maybe_single().execute()
-        count = int(response.data["value"]) if response and response.data else 0
-
-        if count >= 25:
-            yield "API rate limit (25 requests/day) exceeded. Please try again tomorrow.\n"
-            return
-
-        # Run fetch script
-        yield "Fetching data from Alpha Vantage...\n"
+        # We removed the rate limit check because yfinance allows frequent access
+        yield "Connecting to Yahoo Finance via yfinance...\n"
 
         process = subprocess.Popen(
             [sys.executable, "fetch_and_upload.py"],
@@ -244,12 +201,14 @@ def fetch_latest_stream():
             yield line
 
         process.wait()
-        # Refresh cache with newly ingested data
+        
+        # Refresh cache immediately
         try:
             get_stock_dataframe(force_refresh=True)
         except ValueError:
             pass
-        yield f"\n Done. Exit code: {process.returncode}\n"
+            
+        yield f"\nDone. Exit code: {process.returncode}\n"
 
     return StreamingResponse(stream_logs(), media_type="text/plain")
 
