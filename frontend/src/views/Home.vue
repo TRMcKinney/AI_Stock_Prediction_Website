@@ -23,7 +23,7 @@
 
     <section id="data" ref="dataSection" class="py-20 bg-gray-50" v-motion="{ initial: { opacity: 0, y: 50 }, visibleOnce: { opacity: 1, y: 0 } }">
       <div class="container mx-auto px-4">
-        <StockDataDashboard />
+         <StockDataDashboard />
       </div>
     </section>
 
@@ -46,24 +46,23 @@
     <Modal v-if="showModal" @close="closePredictionModal">
       <PredictionProgress :models="selectedModels" :abortSignal="predictionAbortController?.signal" @complete="handlePredictionComplete" />
     </Modal>
-
-    <FetchLogsModal v-if="showFetchLogs" :logLines="fetchLogLines" @close="showFetchLogs = false" />
   </div>
 </template>
 
 <script setup>
-import { ref, provide, watch, onMounted } from 'vue'
+import { ref, provide, watch } from 'vue'
 
 import Hero from '../components/Hero.vue'
 import NavBar from '../components/NavBar.vue'
 import About from '../components/About.vue'
 import PredictButton from '../components/PredictButton.vue'
 import PredictionTable from '../components/PredictionTable.vue'
-import StockDataDashboard from '../components/StockDataDashboard.vue'
 import PredictionDetails from '../components/PredictionDetails.vue'
 import PredictionInside from '../components/PredictionInside.vue'
 import PredictionProgress from '../components/PredictionProgress.vue'
 import Modal from '../components/Modal.vue'
+// NEW IMPORT
+import StockDataDashboard from '../components/StockDataDashboard.vue'
 
 // === PREDICTION MODAL ===
 const showModal = ref(false)
@@ -103,34 +102,6 @@ provide('triggerPrediction', triggerPrediction)
 
 watch(showModal, (isOpen) => {
   document.body.style.overflow = isOpen ? 'hidden' : 'auto'
-})
-
-// === FETCH LOGS MODAL ===
-const showFetchLogs = ref(false)
-const fetchCount = ref(null)
-
-const triggerFetchLogs = () => {
-  showFetchLogs.value = true
-  getFetchCount()
-}
-
-provide('triggerFetchLogs', triggerFetchLogs)
-provide('fetchCount', fetchCount)
-
-// === Fetch API usage count from backend ===
-const getFetchCount = async () => {
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/fetch-count`)
-    const json = await res.json()
-    fetchCount.value = json.count
-  } catch (err) {
-    fetchCount.value = null
-  }
-}
-
-// Load fetch count on first mount
-onMounted(() => {
-  getFetchCount()
 })
 
 // === Smooth scroll helpers ===
