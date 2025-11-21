@@ -87,10 +87,50 @@ async function refreshAll() {
 }
 
 async function fetchStats() {
-  // Corrected "const" keyword here:
-  const res = await fetch(`${API_URL}/stock-stats`)
-  stats.value = await res.json()
+  try {
+    const res = await fetch(`${API_URL}/stock-stats`)
+    if (res.ok) {
+      stats.value = await res.json()
+    }
+  } catch (e) {
+    console.error("Failed to load stats", e)
+  }
 }
 
 async function fetchChart() {
-  const res
+  try {
+    const res = await fetch(`${API_URL}/stock-100`)
+    const raw = await res.json()
+    
+    if (!raw || !raw.length) return
+    
+    // Transform data for the simplified StockChart component
+    const processed = raw.map(d => ({
+      x: new Date(d.date).toLocaleDateString('en-GB'),
+      y: d.close
+    }))
+
+    chartData.value = {
+      labels: processed.map(p => p.x),
+      datasets: [{
+        label: 'AAPL Close ($)',
+        data: processed.map(p => p.y),
+        borderColor: '#7c3aed',
+        backgroundColor: 'rgba(124, 58, 237, 0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        pointHoverRadius: 4
+      }]
+    }
+  } catch (e) {
+    console.error("Failed to load chart", e)
+  }
+}
+
+async function handleSyncComplete() {
+  showSyncModal.value = false
+  // Re-fetch everything to show the new data on the chart
+  await refreshAll()
+}
+</script>
